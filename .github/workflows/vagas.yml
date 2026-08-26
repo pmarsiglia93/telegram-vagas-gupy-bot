@@ -1,17 +1,28 @@
-name: Vagas Bot
+name: JobMatch AI
 
 on:
   schedule:
     - cron: '0 11,13,15,17,19,21,23 * * 1-5'  # Seg-Sex: 8h, 10h, 12h, 14h, 16h, 18h, 20h (BRT)
     - cron: '0 13,17,21 * * 0,6'               # Sáb-Dom: 10h, 14h, 18h (BRT)
-  workflow_dispatch:                             # Permite rodar manualmente pelo GitHub
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Rodar sem enviar ao Telegram'
+        type: boolean
+        default: false
 
 permissions:
   contents: write
 
+concurrency:
+  # Duas execuções simultâneas brigariam pelo commit do vagas_gupy.db.
+  group: jobmatch-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   buscar-vagas:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     steps:
       - name: Checkout repositório
@@ -21,21 +32,48 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+          cache: pip
 
       - name: Instalar dependências
-        run: pip install -r requirements.txt
+        run: |
+          pip install -r requirements-dev.txt
+          # SDK do LLM só é instalado quando há provider configurado — mantém
+          # a execução leve nas rodadas sem IA.
+          if [ -n "${{ vars.LLM_PROVIDER }}" ] && [ "${{ vars.LLM_PROVIDER }}" != "none" ]; then
+            pip install -r requirements-ai.txt
+          fi
+
+      - name: Rodar testes
+        # As regras críticas (senioridade não elimina, localização por modelo
+        # de trabalho) são verificadas antes de qualquer envio.
+        run: python -m pytest tests/ -q
 
       - name: Executar bot
         env:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           CHAT_ID_GRUPO: ${{ secrets.CHAT_ID_GRUPO }}
+          # Opcionais: sem eles o bot roda em modo heurístico + embedding local.
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          LLM_PROVIDER: ${{ vars.LLM_PROVIDER || 'none' }}
+          LLM_MODEL: ${{ vars.LLM_MODEL }}
+          LLM_MAX_JOBS: ${{ vars.LLM_MAX_JOBS || '15' }}
+          EMBEDDING_PROVIDER: ${{ vars.EMBEDDING_PROVIDER || 'hashing' }}
+          # VECTOR_STORE fica em `memory`: o índice do perfil tem ~25 chunks e
+          # é reconstruído a cada execução, então não há estado para persistir
+          # entre runs do Actions.
+          VECTOR_STORE: memory
+          DRY_RUN: ${{ inputs.dry_run && '1' || '' }}
         run: python main.py
 
       - name: Salvar banco de dados atualizado
+        if: ${{ !inputs.dry_run }}
         continue-on-error: true
         run: |
           git config --local user.email "action@github.com"
-          git config --local user.name "Vagas Bot"
+          git config --local user.name "JobMatch AI"
           git add vagas_gupy.db
           git diff --staged --quiet || git commit -m "chore: atualiza vagas_gupy.db [skip ci]"
+          git pull --rebase --autostash || true
           git push

@@ -1,0 +1,14 @@
+# Dependências OPCIONAIS da camada de IA.
+# O bot roda sem nenhuma delas — só perde a análise por LLM e o Chroma
+# persistente, caindo para o matcher heurístico + embedding local (§22).
+#
+#   pip install -r requirements-ai.txt
+
+# LLM — só é necessário o SDK do provider que você usar em LLM_PROVIDER.
+# OpenAI e Gemini são acessados via REST (requests), sem SDK.
+anthropic>=0.40
+
+# Banco vetorial persistente. Pesado (~250 MB com onnxruntime): mantido fora
+# do requirements.txt de propósito, porque o GitHub Actions reconstrói o índice
+# do perfil a cada execução e o store em memória dá conta (§23).
+# chromadb>=0.5

@@ -1,0 +1,1022 @@
+# =============================================================================
+# PERFIL PROFISSIONAL — JobMatch AI
+# =============================================================================
+# Este arquivo é a ÚNICA fonte de verdade sobre o candidato. Nada de perfil
+# deve estar hardcoded no código Python.
+#
+# EVIDÊNCIA (`evidence`) — cada skill lista as PROVAS de que a competência
+# existe. Uma skill pode ter várias; a mais forte define como ela é
+# apresentada, e as demais somam um bônus pequeno e limitado.
+#
+# A pergunta deixou de ser "tem experiência profissional? sim/não" e passou a
+# ser "qual é a evidência?". Conhecimento real conta — sem nunca ser
+# apresentado como emprego formal.
+#
+#   professional        1.00  usou em produção, remunerado, vínculo formal
+#   freelance           0.95  usou em produção, remunerado, autônomo
+#   production_project  0.85  projeto próprio rodando de verdade
+#   project             0.75  projeto próprio / portfólio publicado
+#   academic_project    0.62
+#   knowledge / hands_on 0.60 sabe aplicar / POC, laboratório
+#   certification       0.55
+#   course              0.48  curso ou bootcamp concluído
+#   study               0.40  estudando agora
+#   interest            0.20
+#
+# `note` é o que sustenta a afirmação. Preencha com fatos verificáveis —
+# é isso que impede o LLM de inventar contexto.
+# =============================================================================
+
+identity:
+  name: Paulo Marsiglia
+  headline: Desenvolvedor Front-End / Full Stack — em transição para AI Engineer
+
+location:
+  city: São Paulo
+  state: SP
+  country: Brasil
+  # Municípios aceitos para vagas HÍBRIDAS e PRESENCIAIS (Grande SP / RMSP).
+  # Vagas REMOTAS ignoram esta lista — valem para o Brasil inteiro.
+  metro_area:
+    - São Paulo
+    - Grande São Paulo
+    - Região Metropolitana de São Paulo
+    - ABC Paulista
+    - Santo André
+    - São Bernardo do Campo
+    - São Caetano do Sul
+    - Diadema
+    - Mauá
+    - Ribeirão Pires
+    - Rio Grande da Serra
+    - Guarulhos
+    - Osasco
+    - Barueri
+    - Alphaville
+    - Carapicuíba
+    - Cotia
+    - Itapevi
+    - Jandira
+    - Santana de Parnaíba
+    - Taboão da Serra
+    - Embu das Artes
+    - Itapecerica da Serra
+    - São Vicente
+    - Mogi das Cruzes
+    - Suzano
+    - Poá
+    - Itaquaquecetuba
+    - Ferraz de Vasconcelos
+    - Arujá
+    - Cajamar
+    - Franco da Rocha
+    - Caieiras
+    - Mairiporã
+  # Siglas/nomes que confirmam Brasil quando a cidade está ausente.
+  country_aliases: [brasil, brazil, br]
+
+preferences:
+  # Peso de RANKING, nunca filtro. Presencial continua elegível.
+  work_models:
+    remote: 3
+    hybrid: 2
+    onsite: 1
+    unknown: 1
+  # Bônus máximo, em pontos absolutos do score 0-100, aplicado ao modelo preferido.
+  work_model_bonus: 4
+  # Bônus máximo para vagas que pedem competências emergentes já cobertas pelo
+  # perfil (IA aplicada, RAG, automação). Pequeno de propósito: é diferencial
+  # competitivo, não substituto de aderência técnica.
+  emergent_bonus: 4
+
+# Famílias de tecnologia: sustentam o crédito por "tecnologia transferível".
+# Se a vaga pede Vue e o perfil tem React, ambos estão em `frontend_spa` →
+# crédito parcial em vez de gap total.
+families:
+  frontend_spa:      Frameworks de interface SPA
+  frontend_style:    Marcação e estilo
+  language_web:      Linguagens da web
+  backend_node:      Backend em Node
+  backend_java:      Backend em Java
+  backend_php:       Backend em PHP
+  backend_python:    Backend em Python
+  api:               Integração e contratos de API
+  db_sql:            Bancos relacionais
+  db_nosql:          Bancos não relacionais
+  version_control:   Controle de versão
+  containers:        Containers
+  cicd:              Integração e entrega contínua
+  engineering:       Engenharia e arquitetura de software
+  security:          Segurança da informação
+  observability:     Observabilidade
+  orchestration:     Orquestração de containers
+  iac:               Infraestrutura como código
+  testing:           Testes automatizados
+  ai:                IA aplicada
+  automation:        Automação e integração
+  cloud:             Nuvem
+  mobile:            Mobile
+  ecommerce:         Plataformas de e-commerce
+
+# -----------------------------------------------------------------------------
+# TAXONOMIA DE SKILLS
+# -----------------------------------------------------------------------------
+# Grupos de tecnologias relacionadas. Sustentam o crédito por competência
+# transferível: a vaga pede Pinecone, o perfil tem ChromaDB — ambos em `rag`,
+# então isso vira compatibilidade parcial, não gap.
+#
+# Os membros incluem DE PROPÓSITO tecnologias que o perfil não tem: é
+# justamente isso que permite reconhecer a vizinhança.
+#
+# `transfer_factor` (0..1) calibra quanto do peso da skill vizinha é
+# aproveitado. Proximidades diferentes valem coisas diferentes:
+# ChromaDB→Pinecone é quase equivalente (0.75); Docker→Kubernetes é um salto
+# grande (0.30) e não pode inflar vaga de SRE.
+skill_groups:
+
+  frontend_frameworks:
+    transfer_factor: 0.65
+    members: [react, react.js, next.js, nextjs, vue, vue.js, nuxt, angular,
+              preact, svelte, sveltekit, solidjs, ember, remix, astro, spa,
+              single page application, componentizacao]
+
+  styling:
+    transfer_factor: 0.70
+    members: [css, scss, sass, less, tailwind, tailwindcss, bootstrap,
+              styled components, css modules, material ui, mui, chakra ui,
+              ant design, shadcn, design system]
+
+  node_ecosystem:
+    transfer_factor: 0.70
+    members: [node, node.js, nodejs, deno, express, nestjs, fastify, koa, adonis, bun]
+
+  java_backend:
+    transfer_factor: 0.60
+    members: [java, jvm, spring, spring boot, quarkus, micronaut, jakarta ee, hibernate]
+
+  php_backend:
+    transfer_factor: 0.70
+    members: [php, laravel, symfony, codeigniter, slim]
+
+  python_backend:
+    transfer_factor: 0.65
+    members: [python, django, fastapi, flask, tornado, celery, pydantic]
+
+  relational_databases:
+    transfer_factor: 0.70
+    members: [sql, postgresql, postgres, pgsql, mysql, mariadb, sql server,
+              sqlserver, oracle, sqlite, modelagem de dados]
+
+  nosql:
+    transfer_factor: 0.60
+    members: [nosql, mongodb, mongo, redis, dynamodb, cassandra, firestore,
+              elasticsearch, opensearch]
+
+  llm:
+    transfer_factor: 0.70
+    members: [llm, llms, large language model, openai, openai api, anthropic,
+              anthropic api, claude, gemini, gemini api, gpt, azure openai,
+              bedrock, aws bedrock, vertex ai, hugging face, ollama,
+              prompt engineering, structured outputs, function calling]
+
+  rag:
+    transfer_factor: 0.75
+    members: [rag, retrieval augmented generation, embedding, embeddings,
+              vector database, banco vetorial, vector store, chromadb, chroma,
+              pinecone, qdrant, weaviate, pgvector, faiss, milvus, elasticsearch vector,
+              semantic search, busca semantica, similaridade semantica]
+
+  ai_agents:
+    transfer_factor: 0.65
+    members: [ai agent, ai agents, agentes de ia, agentic, agentic workflows,
+              tool calling, function calling, langchain, llamaindex, langgraph,
+              crewai, autogen, mcp, model context protocol]
+
+  automation:
+    transfer_factor: 0.70
+    members: [n8n, make.com, integromat, zapier, power automate,
+              workflow automation, automacao, automation, rpa, airflow]
+
+  api_integration:
+    transfer_factor: 0.65
+    members: [rest, rest api, restful, api rest, apis rest, graphql, apollo,
+              webhook, webhooks, integracao de apis, openapi, swagger, grpc,
+              soap, web services, servicos http, axios, fetch api]
+
+  version_control:
+    # Git/GitHub NÃO transferem para observabilidade, IaC ou nuvem. Antes,
+    # tudo isso caía na família ampla `infra`, cujo "melhor" era Git — e
+    # Datadog/Grafana/Prometheus herdavam 55% do peso de Git (33 ocorrências
+    # no dataset real). Grupo próprio encerra esse caminho.
+    transfer_factor: 0.60
+    members: [git, github, gitlab, bitbucket, versionamento, controle de versao,
+              subversion, svn, mercurial, pull request, code review]
+
+  containers:
+    transfer_factor: 0.60
+    members: [docker, container, containers, docker compose, containerizacao,
+              containerization, podman, buildah, containerd]
+
+  orchestration:
+    # Docker entra aqui de propósito, com fator BAIXO: conhecer container é
+    # adjacente a orquestrar container, mas está longe de operá-la. É a única
+    # ponte que sustenta Docker -> Kubernetes como transferência fraca.
+    transfer_factor: 0.25
+    members: [kubernetes, k8s, openshift, helm, argocd, eks, aks, gke, nomad,
+              service mesh, istio, docker]
+
+  observability:
+    # Sem skill de observabilidade no perfil: o grupo existe para nomear o gap
+    # com precisão e impedir que ele seja preenchido por outra família.
+    transfer_factor: 0.60
+    members: [observabilidade, observability, datadog, grafana, prometheus,
+              opentelemetry, open telemetry, new relic, newrelic, splunk,
+              elastic apm, kibana, sentry, jaeger, apm, tracing distribuido]
+
+  iac:
+    transfer_factor: 0.50
+    members: [terraform, pulumi, cloudformation, ansible, chef, puppet,
+              infraestrutura como codigo, infrastructure as code, iac]
+
+  cicd:
+    transfer_factor: 0.55
+    members: [ci/cd, ci cd, cicd, integracao continua, entrega continua,
+              github actions, gitlab ci, jenkins, circleci, pipeline, travis]
+
+  cloud:
+    # Sem evidência de nuvem no perfil: o grupo existe para nomear o gap com
+    # precisão, não para gerar crédito.
+    transfer_factor: 0.25
+    members: [aws, amazon web services, azure, gcp, google cloud, cloud,
+              lambda, s3, ec2, cloudfront, cloud run, app engine]
+
+  testing:
+    transfer_factor: 0.65
+    members: [jest, vitest, cypress, playwright, testing library, pytest,
+              testes automatizados, testes unitarios, unit test, tdd, e2e]
+
+  ecommerce_platforms:
+    transfer_factor: 0.45
+    members: [vtex, vtex io, vtex-io, vtex legacy, vtex cms, deco cms, deco.cx,
+              shopify, magento, salesforce commerce, commercetools, woocommerce,
+              nuvemshop, tray, linx, oracle commerce, e-commerce, ecommerce,
+              loja virtual, marketplace]
+
+  web_languages:
+    transfer_factor: 0.75
+    members: [javascript, js, ecmascript, es6, typescript, ts, jquery]
+
+# Grupos considerados COMPETÊNCIA EMERGENTE. Uma vaga que pede tecnologia
+# destes grupos e encontra cobertura real no perfil ganha um bônus pequeno —
+# é onde o perfil é mais competitivo hoje (§5).
+emergent_groups: [rag, llm, ai_agents, automation]
+
+# -----------------------------------------------------------------------------
+# SKILLS
+# -----------------------------------------------------------------------------
+# `aliases` = como a skill aparece escrita nas vagas. Contém APENAS o que o
+# candidato realmente conhece — tecnologias vizinhas ficam em `skill_groups`,
+# para virarem compatibilidade parcial e não match direto.
+#
+# `evidence` = as provas de que a competência existe. A mais forte define como
+# a skill é apresentada; as demais somam um bônus limitado.
+skills:
+  # --- Frontend ---------------------------------------------------------------
+  - name: React
+    family: frontend_spa
+    aliases: [react, react.js, reactjs, react js]
+    evidence:
+      - type: professional
+        note: e-commerces enterprise VTEX na CoreBiz (30+ projetos)
+        source: exp_corebiz
+      - type: professional
+        note: frontend da aplicação de chat/IA na Stalse Analytics
+        source: exp_stalse
+
+  - name: Vue
+    family: frontend_spa
+    aliases: [vue, vue.js, vuejs, vue 2, vue 3, nuxt, nuxt.js]
+    evidence:
+      - type: professional
+        note: Vue.js 2 e 3 nas plataformas educacionais da EAC/Barkeley
+        source: exp_eac_barkeley
+
+  - name: Next.js
+    family: frontend_spa
+    aliases: [next.js, nextjs, next js]
+    evidence:
+      - type: project
+      - type: knowledge
+
+  - name: Angular
+    family: frontend_spa
+    aliases: [angular, angularjs, angular 2+]
+    evidence:
+      - type: knowledge
+
+  - name: JavaScript
+    family: language_web
+    aliases: [javascript, js, ecmascript, es6]
+    evidence:
+      - type: professional
+        note: CoreBiz, Quality Digital e EAC/Barkeley
+        source: exp_corebiz
+
+  - name: TypeScript
+    family: language_web
+    aliases: [typescript, ts]
+    evidence:
+      - type: professional
+        note: e-commerces VTEX na CoreBiz e na Quality Digital
+        source: exp_corebiz
+
+  - name: HTML
+    family: frontend_style
+    aliases: [html, html5, semantica, acessibilidade, a11y]
+    evidence:
+      - type: professional
+        note: e-commerces enterprise na CoreBiz
+        source: exp_corebiz
+
+  - name: CSS
+    family: frontend_style
+    aliases: [css, css3, flexbox, grid css, responsivo, responsividade]
+    evidence:
+      - type: professional
+        note: e-commerces enterprise na CoreBiz
+        source: exp_corebiz
+
+  - name: SCSS/Sass
+    family: frontend_style
+    aliases: [scss, sass, less css, lesscss, styled components, css modules]
+    evidence:
+      - type: professional
+        note: e-commerces enterprise na CoreBiz
+        source: exp_corebiz
+
+  - name: Tailwind
+    family: frontend_style
+    aliases: [tailwind, tailwindcss]
+    evidence:
+      - type: professional
+        note: e-commerces Electrolux/Frigidaire na Quality Digital
+        source: exp_quality_digital
+
+  - name: Bootstrap
+    family: frontend_style
+    aliases: [bootstrap]
+    evidence:
+      - type: professional
+        note: plataformas educacionais da EAC/Barkeley
+        source: exp_eac_barkeley
+
+  - name: Preact
+    family: frontend_spa
+    aliases: [preact]
+    evidence:
+      - type: professional
+        note: storefronts Deco CMS na Quality Digital
+        source: exp_quality_digital
+
+  - name: VTEX IO
+    family: ecommerce
+    aliases: [vtex io, vtex-io, vtex]
+    evidence:
+      - type: professional
+        note: plataforma principal na CoreBiz (30+ projetos) e na Quality Digital
+        source: exp_corebiz
+      - type: professional
+        source: exp_quality_digital
+
+  - name: VTEX Legacy
+    family: ecommerce
+    aliases: [vtex legacy, vtex cms, vtex classic, portal vtex]
+    evidence:
+      - type: professional
+        note: manutenção de lojas legadas na CoreBiz
+        source: exp_corebiz
+
+  - name: Deco CMS
+    family: ecommerce
+    aliases: [deco cms, deco.cx, decocx]
+    evidence:
+      - type: professional
+        note: storefronts Electrolux/Frigidaire na Quality Digital
+        source: exp_quality_digital
+
+  - name: Deno
+    family: backend_node
+    aliases: [deno]
+    evidence:
+      - type: professional
+        note: runtime dos storefronts Deco na Quality Digital
+        source: exp_quality_digital
+
+  - name: jQuery
+    family: language_web
+    aliases: [jquery]
+    evidence:
+      - type: professional
+        note: plataformas educacionais da EAC/Barkeley
+        source: exp_eac_barkeley
+
+  - name: Axios
+    family: api
+    aliases: [axios]
+    evidence:
+      - type: professional
+        note: consumo de APIs REST na EAC/Barkeley
+        source: exp_eac_barkeley
+
+  # --- Backend ----------------------------------------------------------------
+  - name: Node.js
+    family: backend_node
+    aliases: [node, node.js, nodejs, node js]
+    evidence:
+      - type: project
+      - type: knowledge
+
+  - name: Express
+    family: backend_node
+    aliases: [express, express.js, expressjs]
+    evidence:
+      - type: project
+      - type: knowledge
+
+  - name: NestJS
+    family: backend_node
+    aliases: [nestjs, nest.js, nest js]
+    evidence:
+      - type: knowledge
+
+  - name: Java
+    family: backend_java
+    aliases: [java, jvm]
+    evidence:
+      - type: course
+        note: bootcamp de Java
+      - type: project
+      - type: knowledge
+
+  - name: Spring Boot
+    family: backend_java
+    aliases: [spring, spring boot, springboot]
+    evidence:
+      - type: course
+        note: bootcamp de Java
+      - type: project
+
+  - name: PHP
+    family: backend_php
+    aliases: [php]
+    evidence:
+      - type: professional
+        note: backend das plataformas educacionais da EAC/Barkeley
+        source: exp_eac_barkeley
+
+  - name: Laravel
+    family: backend_php
+    aliases: [laravel]
+    evidence:
+      - type: professional
+        note: backend das plataformas educacionais da EAC/Barkeley
+        source: exp_eac_barkeley
+
+  - name: Python
+    family: backend_python
+    aliases: [python, py]
+    evidence:
+      - type: professional
+        note: backend Django da aplicação de chat/IA na Stalse Analytics
+        source: exp_stalse
+      - type: production_project
+        note: JobMatch AI — pipeline completo em Python
+        source: proj_jobmatch_ai
+
+  - name: Django
+    family: backend_python
+    aliases: [django]
+    evidence:
+      - type: professional
+        note: backend da aplicação de chat/IA na Stalse Analytics
+        source: exp_stalse
+
+  # --- APIs -------------------------------------------------------------------
+  - name: REST APIs
+    family: api
+    aliases: [rest, rest api, restful, api rest, apis rest, http, servicos http, web services]
+    evidence:
+      - type: professional
+        note: CoreBiz, Stalse Analytics e EAC/Barkeley
+        source: exp_corebiz
+      - type: production_project
+        note: consumo das APIs de Gupy, LinkedIn e Telegram no JobMatch AI
+        source: proj_jobmatch_ai
+
+  - name: GraphQL
+    family: api
+    aliases: [graphql, apollo]
+    evidence:
+      - type: professional
+        note: APIs GraphQL da VTEX IO na CoreBiz
+        source: exp_corebiz
+
+  - name: JWT / Autenticação
+    family: api
+    aliases: [jwt, oauth, autenticacao, authentication, auth]
+    evidence:
+      - type: professional
+        note: autenticação das plataformas educacionais da EAC/Barkeley
+        source: exp_eac_barkeley
+
+  - name: Webhooks / Integração de APIs
+    family: automation
+    aliases: [webhook, webhooks, integracao de apis, integracoes, api integration]
+    evidence:
+      - type: production_project
+        note: integração de três fontes de vagas + Telegram
+        source: proj_jobmatch_ai
+      - type: hands_on
+
+  # --- Bancos -----------------------------------------------------------------
+  - name: PostgreSQL
+    family: db_sql
+    aliases: [postgresql, postgres, pgsql]
+    evidence:
+      - type: professional
+        note: banco da aplicação na Stalse Analytics
+        source: exp_stalse
+
+  - name: MySQL
+    family: db_sql
+    aliases: [mysql, mariadb]
+    evidence:
+      - type: professional
+        note: banco das plataformas educacionais da EAC/Barkeley
+        source: exp_eac_barkeley
+
+  - name: SQL
+    family: db_sql
+    aliases: [sql, banco relacional, bancos relacionais, modelagem de dados]
+    evidence:
+      - type: professional
+        note: PostgreSQL na Stalse e MySQL na EAC/Barkeley
+        source: exp_eac_barkeley
+
+  - name: SQLite
+    family: db_sql
+    aliases: [sqlite, sqlite3]
+    evidence:
+      - type: production_project
+        note: persistência, deduplicação e histórico do JobMatch AI
+        source: proj_jobmatch_ai
+
+  - name: MongoDB
+    family: db_nosql
+    aliases: [mongodb, mongo, mongoose]
+    evidence:
+      - type: project
+      - type: knowledge
+
+  - name: Redis
+    family: db_nosql
+    aliases: [redis, cache]
+    evidence:
+      - type: professional
+        note: cache da aplicação na Stalse Analytics
+        source: exp_stalse
+
+  - name: NoSQL
+    family: db_nosql
+    aliases: [nosql]
+    evidence:
+      - type: knowledge
+
+  # --- Infra / engenharia -----------------------------------------------------
+  - name: Docker
+    family: containers
+    aliases: [docker, container, containers, docker compose]
+    evidence:
+      - type: hands_on
+      - type: knowledge
+
+  - name: Git
+    family: version_control
+    aliases: [git, versionamento, controle de versao]
+    evidence:
+      - type: professional
+        note: usado em todas as experiências profissionais
+        source: exp_corebiz
+
+  - name: GitHub
+    family: version_control
+    aliases: [github, gitlab, bitbucket, pull request, code review]
+    evidence:
+      - type: professional
+
+  - name: CI/CD
+    family: cicd
+    aliases: [ci/cd, ci cd, cicd, integracao continua, entrega continua, pipeline]
+    evidence:
+      - type: production_project
+        note: pipeline agendado do JobMatch AI rodando em produção
+        source: proj_jobmatch_ai
+      - type: knowledge
+
+  - name: GitHub Actions
+    family: cicd
+    aliases: [github actions, gh actions, workflow]
+    evidence:
+      - type: production_project
+        note: execução automatizada 10x/dia com testes no pipeline
+        source: proj_jobmatch_ai
+
+  - name: Arquitetura de software
+    family: engineering
+    aliases: [arquitetura de software, clean code, solid, design patterns,
+              microservicos, microsservicos, camadas, separacao de responsabilidades]
+    evidence:
+      - type: professional
+      - type: production_project
+        note: arquitetura em camadas com providers plugáveis no JobMatch AI
+        source: proj_jobmatch_ai
+
+  # --- Testes -----------------------------------------------------------------
+  - name: Testes automatizados
+    family: testing
+    aliases: [jest, testes automatizados, testes unitarios, unit test, pytest, tdd]
+    evidence:
+      - type: production_project
+        note: suíte de testes cobrindo as regras críticas do JobMatch AI
+        source: proj_jobmatch_ai
+      - type: knowledge
+
+  # --- IA aplicada ------------------------------------------------------------
+  # Sem experiência PROFISSIONAL formal — mas com implementação real e em
+  # produção neste repositório. É evidência de projeto, e conta como tal.
+  - name: RAG
+    family: ai
+    aliases: [rag, retrieval augmented generation, retrieval-augmented]
+    evidence:
+      - type: production_project
+        note: pipeline de recuperação sobre o perfil profissional no JobMatch AI
+        source: proj_jobmatch_ai
+      - type: study
+      - type: course
+
+  - name: Embeddings
+    family: ai
+    aliases: [embedding, embeddings, vetorizacao, similaridade semantica]
+    evidence:
+      - type: production_project
+        note: geração e comparação de embeddings, com provider local e remoto
+        source: proj_jobmatch_ai
+      - type: study
+
+  - name: ChromaDB
+    family: ai
+    aliases: [chromadb, chroma]
+    evidence:
+      - type: production_project
+        note: vector store implementado atrás de abstração no JobMatch AI
+        source: proj_jobmatch_ai
+      - type: study
+
+  - name: Vector databases
+    family: ai
+    aliases: [vector database, banco vetorial, vector store, bancos vetoriais]
+    evidence:
+      - type: production_project
+        note: camada VectorStore trocável (memória e ChromaDB)
+        source: proj_jobmatch_ai
+      - type: study
+
+  - name: LLMs
+    family: ai
+    aliases: [llm, llms, large language model, modelos de linguagem,
+              integracao com llm, llm integration]
+    evidence:
+      - type: professional
+        note: >-
+          integração com LLM via API da OpenAI em produto de chat na Stalse
+          Analytics — integração de API, não treinamento de modelos
+        source: exp_stalse
+      - type: production_project
+        note: integração multi-provider (Anthropic, OpenAI, Gemini) com fallback
+        source: proj_jobmatch_ai
+      - type: study
+      - type: course
+
+  - name: Prompt Engineering
+    family: ai
+    aliases: [prompt engineering, engenharia de prompt, prompts]
+    evidence:
+      - type: production_project
+        note: prompt de análise com regras de evidência e saída estruturada
+        source: proj_jobmatch_ai
+      - type: study
+
+  - name: Structured Outputs
+    family: ai
+    aliases: [structured output, structured outputs, saida estruturada, json schema]
+    evidence:
+      - type: production_project
+        note: JSON Schema validado antes do uso, com fallback em caso de saída inválida
+        source: proj_jobmatch_ai
+
+  - name: Busca semântica
+    family: ai
+    aliases: [busca semantica, semantic search, ranking semantico, similaridade textual]
+    evidence:
+      - type: production_project
+        note: ranking de vagas por similaridade semântica
+        source: proj_jobmatch_ai
+
+  - name: AI Agents
+    family: ai
+    aliases: [ai agent, ai agents, agentes de ia, agentic, tool calling, function calling]
+    evidence:
+      - type: study
+      - type: hands_on
+
+  - name: OpenAI API
+    family: ai
+    aliases: [openai, openai api, gpt, chatgpt]
+    evidence:
+      - type: professional
+        note: integração com a API da OpenAI em produto de chat/IA na Stalse Analytics
+        source: exp_stalse
+      - type: production_project
+        note: provider OpenAI implementado no JobMatch AI
+        source: proj_jobmatch_ai
+
+  - name: Anthropic / Gemini APIs
+    family: ai
+    # Sem uso profissional: só a OpenAI foi usada em produto remunerado.
+    aliases: [anthropic, anthropic api, claude api, gemini, gemini api]
+    evidence:
+      - type: production_project
+        note: providers Anthropic e Gemini implementados no JobMatch AI
+        source: proj_jobmatch_ai
+      - type: study
+
+  # --- Automação --------------------------------------------------------------
+  - name: n8n
+    family: automation
+    aliases: [n8n]
+    evidence:
+      - type: course
+        note: curso de automação com n8n
+      - type: hands_on
+        note: automações próprias construídas durante o estudo
+      - type: study
+
+  - name: Make
+    family: automation
+    # "make" sozinho é verbo comum do inglês (casava em 27/185 descrições
+    # coletadas). `aliases_only` impede que o próprio nome da skill seja usado
+    # na detecção. Perde-se a vaga que escreve apenas "Make", em troca de
+    # eliminar o ruído.
+    aliases_only: true
+    aliases: [make.com, integromat, automacao com make]
+    evidence:
+      - type: course
+        note: curso de automação com Make
+      - type: hands_on
+        note: automações próprias construídas durante o estudo
+      - type: study
+
+  - name: Automação de processos
+    family: automation
+    aliases: [automacao, automation, automacao de processos, workflow automation]
+    evidence:
+      - type: production_project
+        note: coleta, análise e notificação totalmente automatizadas
+        source: proj_jobmatch_ai
+      - type: hands_on
+
+  - name: Cibersegurança
+    family: security
+    aliases: [ciberseguranca, seguranca da informacao, security, appsec, owasp]
+    evidence:
+      - type: course
+        note: curso de cibersegurança
+
+# -----------------------------------------------------------------------------
+# EXPERIÊNCIA PROFISSIONAL
+# -----------------------------------------------------------------------------
+# Cada entrada vira UM chunk semântico no RAG, com tecnologias + domínio +
+# contexto do produto. Períodos sobrepostos são reais e não devem ser
+# "corrigidos": há atuações simultâneas.
+experiences:
+
+  - id: exp_corebiz
+    company: CoreBiz
+    role: Desenvolvedor Front-End
+    period: "maio/2022 a julho/2024"
+    technologies: [React, JavaScript, TypeScript, VTEX IO, VTEX Legacy,
+                   GraphQL, REST APIs, HTML, CSS, SCSS, Git]
+    domains: [frontend, e-commerce, enterprise, web development,
+              integrações, APIs, alto volume transacional]
+    summary: >
+      Desenvolvimento e manutenção de e-commerces enterprise, principalmente
+      sobre VTEX IO e VTEX Legacy. Atuação em mais de 30 clientes e projetos,
+      incluindo marcas como Motorola, Aramis, O Boticário e Chilli Beans.
+      Participação em operações de e-commerce com volume transacional
+      relevante, superiores a R$ 100 mil por dia. Construção de interfaces em
+      React com TypeScript, consumo de APIs REST e GraphQL, e integrações entre
+      a plataforma e sistemas dos clientes.
+
+  - id: exp_stalse
+    company: Stalse Analytics
+    role: Desenvolvedor Full Stack
+    period: "setembro/2024 a novembro/2024"
+    technologies: [React, Python, Django, PostgreSQL, Redis, OpenAI API,
+                   REST APIs, Git]
+    domains: [full stack, frontend, backend, web applications, APIs,
+              inteligência artificial, integração com LLM, chat]
+    summary: >
+      Atuação full stack em aplicação com React no frontend e Python/Django no
+      backend, com PostgreSQL e Redis. Participação em produto com
+      funcionalidades de chat e IA, incluindo integração profissional com a API
+      da OpenAI para geração de respostas. Desenvolvimento e consumo de APIs
+      REST entre frontend e backend.
+
+  - id: exp_quality_digital
+    company: Quality Digital
+    role: Desenvolvedor Front-End
+    period: "junho/2025 a dezembro/2025"
+    technologies: [VTEX IO, Deco CMS, Deno, Preact, Tailwind CSS, TailwindCSS,
+                   JavaScript, TypeScript, Git]
+    domains: [frontend, e-commerce, LATAM, enterprise, web development,
+              alto tráfego, performance]
+    summary: >
+      Desenvolvimento e manutenção de e-commerces da Electrolux e Frigidaire na
+      América Latina. Atuação sobre VTEX IO e Deco CMS (deco.cx), com Deno,
+      Preact e Tailwind CSS. Participação na preparação das aplicações para
+      períodos críticos de tráfego como a Black Friday, com foco em estabilidade
+      e performance sob alta carga.
+
+  - id: exp_eac_barkeley
+    company: EAC Personnalité / Barkeley School
+    role: Desenvolvedor Full Stack
+    period: "julho/2025 a julho/2026"
+    technologies: [Vue.js 2, Vue.js 3, JavaScript, PHP, Laravel, Axios, jQuery,
+                   Bootstrap, MySQL, JWT, REST APIs, Git]
+    domains: [full stack, frontend, backend, EdTech, plataformas educacionais,
+              APIs, autenticação, sistemas web]
+    summary: >
+      Desenvolvimento e manutenção de plataformas educacionais, atuando tanto no
+      frontend quanto no backend. Frontend em Vue.js 2 e Vue.js 3, com jQuery,
+      Bootstrap e Axios para consumo de APIs; backend em PHP/Laravel com MySQL e
+      autenticação via JWT. Participação em funcionalidades de área do aluno,
+      afiliação, financeiro, provas, calendário e fluxos internos da plataforma.
+
+# -----------------------------------------------------------------------------
+# PROJETOS
+# -----------------------------------------------------------------------------
+projects:
+  - id: proj_jobmatch_ai
+    name: JobMatch AI — sistema de recomendação de vagas
+    type: personal_project
+    level: production_project
+    url: https://github.com/pmarsiglia93/telegram-vagas-gupy-bot
+    technologies: [python, rag, embeddings, vector database, chromadb, llm,
+                   openai, anthropic, gemini, prompt engineering, structured outputs,
+                   semantic search, sqlite, github actions, ci/cd, telegram api,
+                   rest apis, webhooks, automacao, testes automatizados,
+                   arquitetura de software]
+    summary: >
+      Sistema automatizado de descoberta e recomendação de vagas, em produção e
+      rodando 10x por dia via GitHub Actions. Coleta oportunidades de três
+      fontes (API da Gupy, API guest do LinkedIn e scraping do ProgramaThor),
+      normaliza tudo em um modelo único de vaga e extrai requisitos reais da
+      descrição. Indexa o perfil profissional em chunks semânticos, gera
+      embeddings e usa RAG para recuperar os trechos relevantes a cada vaga,
+      que alimentam uma análise estruturada por LLM validada contra JSON
+      Schema. Implementa camada de providers plugáveis para LLM, embeddings e
+      vector store (memória e ChromaDB), fallback em cada camada de IA para que
+      falha de IA nunca impeça o envio, deduplicação por fingerprint em SQLite,
+      score de compatibilidade 0-100 com análise de gaps e notificação no
+      Telegram. Coberto por suíte de testes automatizados executada no CI.
+
+# -----------------------------------------------------------------------------
+# ESTUDOS, CURSOS E EXPERIMENTAÇÃO
+# -----------------------------------------------------------------------------
+# Não são experiência profissional — e o pipeline nunca os apresenta como tal.
+# Mas são evidência real de competência e contam no score.
+studies:
+  - id: study_ai_engineering
+    topic: AI Engineering — RAG, embeddings e bancos vetoriais
+    level: study
+    technologies: [rag, llm, embeddings, chromadb, vector database, semantic search,
+                   prompt engineering, structured outputs]
+    summary: >
+      Estudo de engenharia de aplicações com LLMs: recuperação aumentada por
+      geração, geração e uso de embeddings, bancos vetoriais, chunking
+      semântico, avaliação de saídas estruturadas e estratégias de fallback.
+      Conhecimento aplicado na prática no projeto JobMatch AI.
+
+  - id: study_ai_agents
+    topic: AI Agents e orquestração
+    level: study
+    technologies: [ai agents, tool calling, function calling, agentic workflows]
+    summary: >
+      Estudo de agentes de IA: uso de ferramentas (tool/function calling),
+      orquestração de fluxos agênticos e padrões de coordenação entre agentes.
+
+  - id: course_automation
+    topic: Automação low-code com n8n e Make
+    level: course
+    technologies: [n8n, make, webhooks, integracao de apis, automacao]
+    summary: >
+      Curso de automação de processos e integração entre sistemas com n8n e
+      Make, com automações próprias construídas durante o curso: consumo de
+      APIs de terceiros, webhooks e encadeamento de fluxos.
+
+  - id: course_java
+    topic: Bootcamp de Java e Spring Boot
+    level: course
+    technologies: [java, spring boot, rest apis, sql]
+    summary: >
+      Bootcamp de desenvolvimento backend com Java e Spring Boot, incluindo
+      construção de APIs REST e integração com banco relacional.
+
+  - id: course_security
+    topic: Cibersegurança
+    level: course
+    technologies: [ciberseguranca, seguranca da informacao, owasp]
+    summary: >
+      Curso de fundamentos de cibersegurança e segurança da informação.
+
+# -----------------------------------------------------------------------------
+# CARGOS-ALVO
+# -----------------------------------------------------------------------------
+# Usados na relevância de cargo e nas queries dos coletores.
+# NÃO são filtro eliminatório sozinhos — a descrição também é considerada.
+roles:
+  frontend:
+    label: Frontend
+    keywords: [front end, frontend, front-end, desenvolvedor front, ui engineer, web developer, desenvolvedor web]
+    search_terms: ["front end", "desenvolvedor front end"]
+  fullstack:
+    label: Full Stack
+    keywords: [full stack, fullstack, full-stack]
+    search_terms: ["full stack", "desenvolvedor full stack"]
+  backend:
+    label: Backend
+    keywords: [back end, backend, back-end, desenvolvedor back, api developer]
+    search_terms: ["back end", "desenvolvedor back end"]
+  software_engineer:
+    label: Software Engineer
+    keywords: [software engineer, software developer, software dev engineer, dev engineer,
+               engenheiro de software, engenheira de software, desenvolvedor de software,
+               desenvolvedor de sistemas, desenvolvimento de sistemas, engenheiro de sistemas,
+               application developer, product engineer, platform engineer,
+               programador, analista de sistemas, analista desenvolvedor,
+               analista de desenvolvimento, desenvolvedor, desenvolvedora, developer,
+               desenvolvimento, especialista em desenvolvimento,
+               principal engineer, staff engineer, tech lead, technical lead]
+    search_terms: ["software engineer", "desenvolvedor de software"]
+  ai_engineer:
+    label: AI Engineer
+    keywords: [ai engineer, ai software engineer, artificial intelligence engineer, engenheiro de ia,
+               engenheiro de inteligencia artificial, machine learning engineer, llm engineer,
+               engenheiro de automacao]
+    search_terms: ["ai engineer", "engenheiro de ia"]
+
+# -----------------------------------------------------------------------------
+# SINAIS DE QUE A VAGA É DE TECNOLOGIA
+# -----------------------------------------------------------------------------
+# Único portão de relevância barato do pipeline (§9). Deliberadamente amplo:
+# na dúvida, a vaga passa e o scoring decide.
+tech_signals:
+  - desenvolvedor
+  - desenvolvedora
+  - developer
+  - engenheiro de software
+  - engineer
+  - engenharia de software
+  - programador
+  - programacao
+  - software
+  - tecnologia
+  - sistemas
+  - front end
+  - frontend
+  - back end
+  - backend
+  - full stack
+  - fullstack
+  - web
+  - api
+  - apis
+  - codigo
+  - code
+  - ti
+  - dados
+  - devops
+  - qa
+  - mobile
+  - inteligencia artificial
+  - machine learning

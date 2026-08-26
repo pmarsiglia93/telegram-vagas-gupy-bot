@@ -216,3 +216,17 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# --- JobMatch AI ---
+# Configuração local do Claude Code: já contém (ou conteve) um GitHub PAT.
+# Hoje é ignorado por uma regra global do usuário; a regra abaixo garante o
+# mesmo comportamento em qualquer clone do repositório.
+.claude/settings.local.json
+
+# Vector store persistente do ChromaDB (VECTOR_STORE=chroma)
+.chroma/
+chroma/
+
+# Artefatos locais de execução
+*.log
+.pytest_cache/
