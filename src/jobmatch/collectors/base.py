@@ -32,6 +32,11 @@ class BaseCollector:
     # busca quadruplicaria o tempo de execução sem ganho nenhum.
     detail_delay = 0.3
 
+    # Teto de avisos de erro HTTP por execução. Uma fonte bloqueada falha do
+    # mesmo jeito em cada página/termo — repetir a mesma linha dezenas de
+    # vezes só gera ruído no log do CI sem informação nova.
+    MAX_AVISOS_HTTP = 3
+
     def __init__(self, profile: Profile, max_age_days: int = 3) -> None:
         self.profile = profile
         self.max_age_days = max_age_days
@@ -39,6 +44,7 @@ class BaseCollector:
         self.requests_made = 0
         self.rate_limited = 0
         self._ultimo_request = 0.0
+        self._avisos_http = 0
         self.session = requests.Session()
         self.session.headers.update({"User-Agent": USER_AGENT, "Accept-Language": "pt-BR,pt;q=0.9"})
 
@@ -76,6 +82,29 @@ class BaseCollector:
             time.sleep(min(max(pausa, self.request_delay * 4), 30.0))
 
         return resp
+
+    def _log_http_error(self, contexto: str, resp) -> None:
+        """Loga o motivo real de uma falha HTTP, não só um contador.
+
+        Sem isto, uma fonte bloqueada (ex.: anti-bot barrando o IP do runner
+        do GitHub Actions) aparecia só como "0 vagas" e um número de erros,
+        sem pista nenhuma do porquê — o mesmo código funcionando localmente e
+        falhando só em CI virava mistério.
+        """
+        self._avisos_http += 1
+        if self._avisos_http > self.MAX_AVISOS_HTTP:
+            return
+        corpo = (resp.text or "")[:300].lower()
+        servidor = resp.headers.get("server", "").lower()
+        if "cloudflare" in corpo or "checking your browser" in corpo or "cloudflare" in servidor:
+            pista = " — parece bloqueio Cloudflare/anti-bot (comum em runners de CI)"
+        elif resp.status_code == 403:
+            pista = " — acesso negado, provável bloqueio por IP ou user-agent"
+        elif resp.status_code == 429:
+            pista = " — rate limit"
+        else:
+            pista = ""
+        print(f"   ⚠️  {self.name} [{contexto}]: HTTP {resp.status_code}{pista}")
 
     def _muito_antiga(self, publicada: datetime | None) -> bool:
         if publicada is None:

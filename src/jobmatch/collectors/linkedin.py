@@ -74,6 +74,7 @@ class LinkedInCollector(BaseCollector):
                     resp = self._get(BUSCA, params=params, timeout=25)
                     if resp.status_code != 200:
                         self.errors += 1
+                        self._log_http_error(rotulo, resp)
                         continue
                     cards = BeautifulSoup(resp.text, "html.parser").find_all("div", class_="base-card")
                 except Exception as exc:

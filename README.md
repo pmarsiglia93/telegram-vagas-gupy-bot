@@ -190,6 +190,15 @@ anterior, listando ganhos, quedas e auditoria de falso positivo. Foi assim que
 se descobriu que o alias `less` (de LESS/CSS) casava com o rodapé
 *"show more show less"* do LinkedIn em **120 de 185** descrições.
 
+`python tools/db.py` lê `vagas_gupy.db` sem precisar lembrar SQL:
+
+```bash
+python tools/db.py resumo       # visão geral do banco
+python tools/db.py top 20       # melhores vagas já analisadas
+python tools/db.py fontes       # desempenho por fonte
+python tools/db.py execucoes    # histórico de execuções
+```
+
 ### Regras de elegibilidade (o único ponto que descarta)
 
 ```
@@ -291,6 +300,33 @@ lido a ~10% do preço de entrada. Para o menor custo possível, use
 `LLM_MODEL=claude-haiku-4-5`.
 
 ---
+
+## 📡 Fontes de vagas
+
+| Fonte | Tipo | Status em produção |
+|---|---|---|
+| Gupy | API JSON pública | ✅ estável |
+| LinkedIn | endpoints guest (HTML) | ✅ estável |
+| ProgramaThor | scraping HTML | ⚠️ ver abaixo |
+
+**ProgramaThor funciona localmente mas retorna 0 vagas no GitHub Actions.**
+Testado manualmente: o mesmo request, com o mesmo User-Agent, devolve
+`200 OK` de uma máquina residencial e é bloqueado a partir dos runners do
+GitHub Actions — o padrão típico de proteção anti-bot que bloqueia faixas de
+IP de datacenter. O coletor loga o status HTTP quando isso acontece (via
+`_log_http_error` em `collectors/base.py`), então a causa fica visível no
+log da execução em vez de aparecer só como "0 vagas".
+
+**Fontes candidatas investigadas para adicionar:**
+
+| Fonte | Viável? | Motivo |
+|---|---|---|
+| [Trampos.co](https://www.trampos.co) | ❌ não | SPA renderizada só no client (bundle `frodo`); o HTML servido não contém nenhuma vaga — exigiria navegador headless (Selenium/Playwright), fora do escopo de um coletor leve |
+| [InfoJobs](https://www.infojobs.com.br) | 🟡 possível | HTML server-rendered real, com seletor estável (`div.js_rowCard`), paginação e busca por "home office" funcionando. Sem API pública conhecida — seria scraping, no mesmo risco de bloqueio por IP que o ProgramaThor. Não implementado ainda; ver issue/decisão antes de construir |
+
+Nenhuma outra fonte foi adicionada sem antes confirmar a estrutura real da
+página — inventar formato de API é a forma mais comum de gerar bug silencioso
+num coletor.
 
 ## 🚀 Executando
 

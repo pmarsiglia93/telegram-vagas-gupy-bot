@@ -51,6 +51,7 @@ class ProgramaThorCollector(BaseCollector):
                     resp = self._get(LISTAGEM, params=params)
                     if resp.status_code != 200:
                         self.errors += 1
+                        self._log_http_error(termo, resp)
                         break
                     cards = BeautifulSoup(resp.text, "html.parser").find_all("div", class_="cell-list")
                 except Exception as exc:

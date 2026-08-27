@@ -63,6 +63,7 @@ class GupyCollector(BaseCollector):
                         resp = self._get(API, headers=headers, params=params)
                         if resp.status_code != 200:
                             self.errors += 1
+                            self._log_http_error(rotulo, resp)
                             break
                         dados = resp.json().get("data", [])
                     except Exception as exc:
