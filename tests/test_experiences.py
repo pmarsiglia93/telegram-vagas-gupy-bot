@@ -243,3 +243,27 @@ def test_localizacao_continua_valendo(profile, local, modelo, valido):
               url="https://exemplo.com/1", raw_location=local, work_model=modelo,
               description="Requisitos e qualificações\nReact\nTypeScript\n")
     assert check_eligibility(job, profile).eligible is valido
+
+
+# --------------------------------------------------------------------------
+# Regressão real: React Native aparecia como gap sem nenhuma evidência,
+# apesar do TCC do MBA na USP (validado pelo Sebrae, aprovado em aceleradora).
+# --------------------------------------------------------------------------
+
+def test_react_native_nao_e_gap(profile):
+    resultado = HeuristicMatcher(profile).match(vaga(
+        "Mobile Developer", ["React Native", "TypeScript", "REST APIs"],
+    ))
+    assert "React Native" not in resultado.gaps, (
+        "React Native tem evidência de projeto (TCC do MBA) — não pode ser gap"
+    )
+    assert "React Native" in resultado.practical_experience
+    # Projeto acadêmico não pode ser apresentado como emprego formal.
+    assert "React Native" not in resultado.strengths
+
+
+def test_react_native_nao_vira_experiencia_profissional(profile):
+    rn = next(s for s in profile.skills if s.name == "React Native")
+    assert rn.category == "practical"
+    assert not any(e.type in ("professional", "freelance") for e in rn.evidence)
+    assert "proj_mba_react_native" in [e.source for e in rn.evidence]

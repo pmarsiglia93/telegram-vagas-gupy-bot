@@ -244,11 +244,13 @@ skill_groups:
               github actions, gitlab ci, jenkins, circleci, pipeline, travis]
 
   cloud:
-    # Sem evidência de nuvem no perfil: o grupo existe para nomear o gap com
-    # precisão, não para gerar crédito.
+    # AWS/Azure (estudo) e GCP (hands-on) já têm evidência própria no perfil;
+    # o grupo segue existindo para dar crédito parcial entre provedores de
+    # nuvem distintos (ex.: vaga pede Lambda, perfil tem GCP Cloud Run).
     transfer_factor: 0.25
-    members: [aws, amazon web services, azure, gcp, google cloud, cloud,
-              lambda, s3, ec2, cloudfront, cloud run, app engine]
+    members: [aws, amazon web services, azure, microsoft azure, gcp, google cloud,
+              google cloud platform, cloud, lambda, s3, ec2, cloudfront,
+              cloud run, app engine]
 
   testing:
     transfer_factor: 0.65
@@ -281,6 +283,17 @@ emergent_groups: [rag, llm, ai_agents, automation]
 # `evidence` = as provas de que a competência existe. A mais forte define como
 # a skill é apresentada; as demais somam um bônus limitado.
 skills:
+  # --- Mobile -------------------------------------------------------------
+  - name: React Native
+    family: mobile
+    aliases: [react native, expo]
+    evidence:
+      - type: academic_project
+        note: >-
+          TCC do MBA na USP: app mobile validado pelo Sebrae, aprovado em
+          aceleradora de startups, nota máxima no MBA
+        source: proj_mba_react_native
+
   # --- Frontend ---------------------------------------------------------------
   - name: React
     family: frontend_spa
@@ -802,6 +815,29 @@ skills:
       - type: course
         note: curso de cibersegurança
 
+  # --- Cloud --------------------------------------------------------------
+  # AWS e Azure: em estudo. GCP: uso prático — contexto (qual projeto/empresa)
+  # a confirmar; entrou como hands_on para não continuar aparecendo como gap
+  # simples enquanto isso, sem promover a profissional sem uma fonte real.
+  - name: AWS
+    family: cloud
+    aliases: [aws, amazon web services]
+    evidence:
+      - type: study
+
+  - name: Azure
+    family: cloud
+    aliases: [azure, microsoft azure]
+    evidence:
+      - type: study
+
+  - name: GCP
+    family: cloud
+    aliases: [gcp, google cloud, google cloud platform]
+    evidence:
+      - type: hands_on
+        note: "uso prático — proveniência (projeto/empresa) a confirmar"
+
 # -----------------------------------------------------------------------------
 # EXPERIÊNCIA PROFISSIONAL
 # -----------------------------------------------------------------------------
@@ -899,6 +935,20 @@ projects:
       falha de IA nunca impeça o envio, deduplicação por fingerprint em SQLite,
       score de compatibilidade 0-100 com análise de gaps e notificação no
       Telegram. Coberto por suíte de testes automatizados executada no CI.
+
+  - id: proj_mba_react_native
+    name: Aplicativo mobile — Trabalho de Conclusão do MBA (USP)
+    type: academic_project
+    level: academic_project
+    technologies: [react native, javascript, typescript, mobile]
+    domains: [mobile, startups, empreendedorismo, validação de produto]
+    summary: >
+      Aplicativo mobile desenvolvido em React Native como trabalho de conclusão
+      de curso do MBA na USP. O projeto foi validado pelo Sebrae, aprovado numa
+      aceleradora de startups e recebeu nota máxima na avaliação do MBA. Não é
+      experiência profissional remunerada, mas é evidência concreta de
+      construção completa de um app mobile em React Native, do zero à validação
+      externa por terceiros.
 
 # -----------------------------------------------------------------------------
 # ESTUDOS, CURSOS E EXPERIMENTAÇÃO

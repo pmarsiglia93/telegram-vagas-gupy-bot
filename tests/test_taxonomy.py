@@ -118,7 +118,11 @@ def test_familias_de_infra_estao_separadas(profile):
         assert skill.name in ("Git", "GitHub")
     assert profile.melhor_do_grupo("observability") is None
     assert profile.melhor_do_grupo("iac") is None
-    assert profile.melhor_do_grupo("cloud") is None
+    # "cloud" TEM skill própria (AWS/Azure em estudo, GCP hands-on) — o ponto
+    # que importa aqui é que nenhuma delas veio de Git/GitHub.
+    melhor_cloud = profile.melhor_do_grupo("cloud")
+    assert melhor_cloud is not None
+    assert melhor_cloud.name not in ("Git", "GitHub")
 
 
 # --------------------------------------------------------------------------

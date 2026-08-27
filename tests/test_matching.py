@@ -70,8 +70,14 @@ COBOL
 
 
 def test_gaps_sao_nomeados_nao_eliminatorios(matcher):
+    """Tecnologia fora do stack não elimina a vaga — aparece nomeada, e só isso."""
     resultado = matcher.match(vaga())
-    assert "AWS" in resultado.gaps or "AWS" in " ".join(resultado.partial_matches)
+    # Kafka não tem nenhuma evidência nem vizinho no perfil: gap de verdade.
+    resultado_kafka = matcher.match(vaga(descricao=DESCRICAO_COMPLETA + "\nKafka\n"))
+    assert "Kafka" in resultado_kafka.gaps
+    assert resultado_kafka.score > 0
+    # AWS tem evidência de estudo no perfil: nunca deveria ser gap silencioso.
+    assert "AWS" in " ".join(resultado.related_knowledge + resultado.gaps + resultado.partial_matches)
     assert resultado.score > 0
 
 
