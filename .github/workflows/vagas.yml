@@ -2,8 +2,14 @@ name: JobMatch AI
 
 on:
   schedule:
-    - cron: '0 11,13,15,17,19,21,23 * * 1-5'  # Seg-Sex: 8h, 10h, 12h, 14h, 16h, 18h, 20h (BRT)
-    - cron: '0 13,17,21 * * 0,6'               # Sáb-Dom: 10h, 14h, 18h (BRT)
+    # Agendamento do GitHub Actions é best-effort: crons de alta frequência vão
+    # sendo despriorizados em runners compartilhados. Medido neste repositório
+    # com 7 execuções/dia: o atraso cresceu de 14 min para 5 h em dois dias, e
+    # depois os horários passaram a ser simplesmente descartados.
+    # 4x/dia dá folga suficiente para o agendador — e o bot agora analisa ~160
+    # vagas por execução, contra as poucas dezenas da versão por keywords.
+    - cron: '0 12,15,18,21 * * 1-5'   # Seg-Sex: 9h, 12h, 15h, 18h (BRT)
+    - cron: '0 14,20 * * 0,6'         # Sáb-Dom: 11h, 17h (BRT)
   workflow_dispatch:
     inputs:
       dry_run:
@@ -57,6 +63,9 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           LLM_PROVIDER: ${{ vars.LLM_PROVIDER || 'none' }}
+          # Teto de mensagens por execução. Ajustável sem mexer no código pela
+          # variável MAX_JOBS_PER_RUN do repositório.
+          MAX_JOBS_PER_RUN: ${{ vars.MAX_JOBS_PER_RUN || '15' }}
           LLM_MODEL: ${{ vars.LLM_MODEL }}
           LLM_MAX_JOBS: ${{ vars.LLM_MAX_JOBS || '15' }}
           EMBEDDING_PROVIDER: ${{ vars.EMBEDDING_PROVIDER || 'hashing' }}

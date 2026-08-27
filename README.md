@@ -334,8 +334,13 @@ Em **Settings → Secrets and variables → Actions**:
 | Variable | `LLM_PROVIDER`, `LLM_MODEL`, `EMBEDDING_PROVIDER` | opcional |
 
 O workflow roda os testes antes do bot, e o SDK do LLM só é instalado quando há
-`LLM_PROVIDER` configurado. Horários: seg–sex 8h/10h/12h/14h/16h/18h/20h,
-sáb–dom 10h/14h/18h (BRT). `workflow_dispatch` aceita um checkbox de dry-run.
+`LLM_PROVIDER` configurado. Horários: **seg–sex 9h/12h/15h/18h, sáb–dom 11h/17h**
+(BRT). `workflow_dispatch` aceita um checkbox de dry-run.
+
+> O agendamento do GitHub Actions é *best-effort*. Com 7 execuções/dia este
+> repositório viu o atraso crescer de 14 min para 5 h em dois dias, até os
+> horários passarem a ser descartados. 4×/dia mantém o agendador confiável —
+> e cada execução agora analisa ~160 vagas, não algumas dezenas.
 
 ---
 
