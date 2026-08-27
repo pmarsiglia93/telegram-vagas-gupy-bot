@@ -2,14 +2,18 @@ name: JobMatch AI
 
 on:
   schedule:
-    # Agendamento do GitHub Actions é best-effort: crons de alta frequência vão
-    # sendo despriorizados em runners compartilhados. Medido neste repositório
-    # com 7 execuções/dia: o atraso cresceu de 14 min para 5 h em dois dias, e
-    # depois os horários passaram a ser simplesmente descartados.
-    # 4x/dia dá folga suficiente para o agendador — e o bot agora analisa ~160
-    # vagas por execução, contra as poucas dezenas da versão por keywords.
-    - cron: '0 12,15,18,21 * * 1-5'   # Seg-Sex: 9h, 12h, 15h, 18h (BRT)
-    - cron: '0 14,20 * * 0,6'         # Sáb-Dom: 11h, 17h (BRT)
+    # Agendamento do GitHub Actions é best-effort. Duas causas identificadas
+    # neste repositório:
+    #   1) alta frequência (7x/dia) — reduzida para 4x/dia, mas isso sozinho
+    #      NÃO resolveu: 2 dos 2 slots seguintes ainda foram descartados;
+    #   2) todos os horários caíam em minuto ":00" — o instante mais
+    #      concorrido de cada hora, quando o maior número de crons de outros
+    #      repositórios dispara. A própria documentação do GitHub recomenda
+    #      evitar ":00"/":15"/":30"/":45" por esse motivo. Deslocado para
+    #      ":07" como segundo experimento antes de migrar para um agendador
+    #      externo (ex.: cron-job.org chamando a API de workflow_dispatch).
+    - cron: '7 12,15,18,21 * * 1-5'   # Seg-Sex: ~9h, ~12h, ~15h, ~18h (BRT)
+    - cron: '7 14,20 * * 0,6'         # Sáb-Dom: ~11h, ~17h (BRT)
   workflow_dispatch:
     inputs:
       dry_run:
