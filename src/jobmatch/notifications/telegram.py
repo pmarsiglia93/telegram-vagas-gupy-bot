@@ -12,6 +12,8 @@ from ..domain.match import MatchResult
 from ..domain.text import truncate
 
 API = "https://api.telegram.org/bot{token}/sendMessage"
+API_GET_ME = "https://api.telegram.org/bot{token}/getMe"
+API_GET_CHAT = "https://api.telegram.org/bot{token}/getChat"
 LIMITE_TELEGRAM = 4096
 
 EMOJI_FONTE = {"GUPY": "🟣", "LINKEDIN": "🔷", "PROGRAMATHOR": "🟤"}
@@ -63,11 +65,17 @@ def format_message(job: Job, match: MatchResult) -> str:
     for bloco in (
         _bloco("\n✅ <b>Experiência profissional</b>", match.strengths),
         _bloco("\n🧪 <b>Projetos / hands-on</b>", match.practical_experience, 4),
+        _bloco("\n🎓 <b>Formação</b>", match.education, 3),
         _bloco("\n📚 <b>Conhecimento relacionado</b>", match.related_knowledge, 3),
         _bloco("\n🔄 <b>Transferível</b>", match.partial_matches, 3),
         _bloco("\n⚠️ <b>Gaps</b>", match.gaps, 4),
     ):
         linhas += bloco
+
+    if match.year_requirements:
+        linhas += ["", "⏳ <b>Tempo exigido</b>",
+                   f"• {esc(match.year_requirements[0])} (perfil comprova uso "
+                   "profissional, não o tempo)"]
 
     if match.reason:
         linhas += ["", "💡 <b>Análise</b>", esc(truncate(match.reason, 380))]
@@ -89,6 +97,52 @@ class TelegramNotifier:
         self.pausa = pausa
         self.enviadas = 0
         self.erros = 0
+
+    def mask_token(self) -> str:
+        """Identificação parcial do token para log — nunca o valor completo."""
+        if not self.token:
+            return "(ausente)"
+        bot_id = self.token.split(":", 1)[0]
+        return f"{bot_id}:***{self.token[-4:]}"
+
+    def check_token(self) -> tuple[bool, str]:
+        """Valida o token sem enviar nada (getMe)."""
+        if not self.token:
+            return False, "TELEGRAM_TOKEN ausente no ambiente/.env"
+        try:
+            r = requests.get(API_GET_ME.format(token=self.token), timeout=10)
+        except Exception as exc:
+            return False, f"falha de rede ao falar com a API: {type(exc).__name__}: {exc}"
+        if r.status_code == 401:
+            return False, "token rejeitado (401) — foi revogado ou está incorreto"
+        if r.status_code != 200:
+            return False, f"HTTP {r.status_code}: {r.text[:120]}"
+        bot = r.json().get("result", {})
+        return True, f"@{bot.get('username', '?')} (bot_id {bot.get('id', '?')})"
+
+    def check_chat(self) -> tuple[bool, str]:
+        """Valida o chat_id sem enviar nada (getChat)."""
+        if not self.chat_id:
+            return False, "CHAT_ID_GRUPO ausente no ambiente/.env"
+        if not self.token:
+            return False, "sem token, não dá para validar o chat"
+        try:
+            r = requests.get(
+                API_GET_CHAT.format(token=self.token),
+                params={"chat_id": self.chat_id}, timeout=10,
+            )
+        except Exception as exc:
+            return False, f"falha de rede: {type(exc).__name__}: {exc}"
+        if r.status_code == 400:
+            return False, (f"chat_id {self.chat_id} inválido ou o bot não é membro "
+                           "do grupo (400)")
+        if r.status_code == 403:
+            return False, "bot sem permissão para falar nesse chat (403)"
+        if r.status_code != 200:
+            return False, f"HTTP {r.status_code}: {r.text[:120]}"
+        chat = r.json().get("result", {})
+        titulo = chat.get("title") or chat.get("username") or chat.get("first_name") or "?"
+        return True, f"{titulo} (tipo {chat.get('type', '?')})"
 
     def send(self, mensagem: str) -> bool:
         if self.dry_run:

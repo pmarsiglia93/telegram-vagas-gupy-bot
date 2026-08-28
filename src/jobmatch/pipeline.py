@@ -160,8 +160,15 @@ class Pipeline:
                 similaridade = resultado.similarity
         return self.matcher.match(job, similaridade)
 
-    def run(self) -> Metrics:
-        inicio = time.monotonic()
+    def prepare(self) -> list[tuple[Job, MatchResult]]:
+        """Etapas 1-7: coleta → dedup → filtros → score → LLM.
+
+        Separado de `run()` para que o diagnóstico execute exatamente o mesmo
+        caminho sem enviar nada — evitando um pipeline paralelo que poderia
+        divergir do real e mascarar o problema que se quer diagnosticar.
+        """
+        import datetime
+        print(f"▶️  Execução iniciada em {datetime.datetime.now():%d/%m/%Y %H:%M:%S}")
 
         # 1. Coleta
         coletadas = self.collect(self._collectors())
@@ -195,6 +202,8 @@ class Pipeline:
             job.location_confirmed = eleg.location_confirmed
             candidatas.append((job, self.score(job)))
 
+        print(f"🎯 {len(candidatas)} elegíveis ({self.metrics.descartadas} descartadas "
+              f"por filtros)")
         self.metrics.analisadas = len(candidatas)
         if self.retriever is not None:
             self.metrics.chamadas_embedding = getattr(self.retriever.embedder, "calls", 0)
@@ -213,12 +222,32 @@ class Pipeline:
             self.metrics.erros += getattr(self.llm, "errors", 0)
             candidatas.sort(key=_sort_key)  # o LLM reordena as notas
 
+        return candidatas
+
+    def run(self) -> Metrics:
+        inicio = time.monotonic()
+        candidatas = self.prepare()
+
         # 8. Envio, do melhor para o pior
-        for job, match in candidatas[: self.settings.max_jobs_per_run]:
+        selecionadas = candidatas[: self.settings.max_jobs_per_run]
+        if not selecionadas:
+            print("\n📭 Nenhuma vaga qualificada para envio nesta execução.")
+        else:
+            print(f"\n📨 Enviando {len(selecionadas)} de {len(candidatas)} candidatas...")
+
+        for job, match in selecionadas:
+            # A vaga só é marcada como enviada se o Telegram confirmar. Falha
+            # de envio precisa deixar a vaga elegível para a próxima execução.
             if self.notifier.send(format_message(job, match)):
                 self.repo.registrar(job, match.score)
                 self.metrics.enviadas += 1
                 print(f"   ✅ [{int(match.score):>3}%] {job.title[:55]}")
+            else:
+                print(f"   ❌ falha no envio, NÃO marcada como enviada: {job.title[:45]}")
+
+        if selecionadas and self.metrics.enviadas == 0:
+            print("   ⚠️  nenhuma mensagem chegou ao Telegram — verifique com "
+                  "`python main.py --diagnose-telegram`")
 
         self.metrics.erros += self.notifier.erros
         self.metrics.duracao_seg = time.monotonic() - inicio
