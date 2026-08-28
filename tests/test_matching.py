@@ -118,16 +118,21 @@ ChromaDB
         assert tech not in fortes, f"'{tech}' é evidência de projeto, não experiência profissional"
 
 
-def test_curso_aparece_como_conhecimento_relacionado(matcher):
-    """Skill sustentada só por curso vai para `related_knowledge`, com o rótulo."""
+def test_curso_aparece_como_formacao(matcher):
+    """Curso concluído virou categoria própria (`education`), separada de estudo.
+
+    Antes caía junto com "em estudo" em `related_knowledge`. Formação concluída
+    é evidência mais forte que estudo em andamento e agora aparece à parte.
+    """
     resultado = matcher.match(vaga(titulo="Analista de Segurança", descricao="""
 Requisitos e qualificações
 Cibersegurança
 OWASP
 """))
-    relacionados = " ".join(resultado.related_knowledge).lower()
-    assert "ciberseguranca" in relacionados or "cibersegurança" in relacionados
-    assert "curso" in relacionados, "o rótulo da evidência precisa acompanhar a skill"
+    formacao = " ".join(resultado.education).lower()
+    assert "ciberseguranca" in formacao or "cibersegurança" in formacao
+    assert "curso" in formacao, "o rótulo da evidência precisa acompanhar a skill"
+    # O que não pode regredir: formação nunca vira experiência profissional.
     assert not any("seguran" in s.lower() for s in resultado.strengths)
 
 
