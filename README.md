@@ -346,6 +346,25 @@ DRY_RUN=1 python main.py               # imprime sem enviar
 Sem nenhuma chave de IA o bot roda normalmente, com score heurístico +
 embedding local.
 
+### Diagnóstico e teste do Telegram
+
+```bash
+python main.py --test-telegram       # valida token/chat e envia 1 mensagem
+python main.py --diagnose-telegram   # percorre o pipeline sem enviar
+```
+
+O diagnóstico usa o mesmo `Pipeline.prepare()` da execução real, então o que
+ele mede é o caminho de verdade — não um pipeline paralelo que poderia
+divergir. Nenhum dos dois imprime o token completo.
+
+> ⚠️ **O `schedule:` do GitHub Actions não é confiável neste repositório.**
+> Medido: `workflow_dispatch` disparou 3/3 vezes; `schedule` falhou em 100%
+> dos horários por mais de 40 horas seguidas, mesmo depois de reduzir a
+> frequência de 7x para 4x/dia e de deslocar os horários para fora do minuto
+> `:00`. O pipeline e o Telegram estão saudáveis — o que falha é o gatilho.
+> A saída robusta é um agendador externo chamando `workflow_dispatch` via API
+> (ver "Pendências" no relatório).
+
 ### Testes
 
 ```bash
