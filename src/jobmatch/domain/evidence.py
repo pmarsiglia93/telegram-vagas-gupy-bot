@@ -22,8 +22,9 @@ EVIDENCE_WEIGHT: dict[str, float] = {
     "academic_project": 0.62,
     "knowledge": 0.60,      # sabe aplicar; nível herdado da versão anterior
     "hands_on": 0.60,       # POC, laboratório, experimentação prática
+    "bootcamp": 0.58,       # formação intensiva com projetos construídos
     "certification": 0.55,
-    "course": 0.48,         # curso ou bootcamp concluído
+    "course": 0.48,         # curso concluído
     "study": 0.40,          # estudando agora
     "interest": 0.20,       # acompanha o assunto, sem prática
 }
@@ -38,6 +39,7 @@ EVIDENCE_LABEL: dict[str, str] = {
     "academic_project": "projeto acadêmico",
     "knowledge": "conhecimento aplicado",
     "hands_on": "experimentação prática",
+    "bootcamp": "formação/bootcamp",
     "certification": "certificação",
     "course": "curso concluído",
     "study": "em estudo",
@@ -47,13 +49,19 @@ EVIDENCE_LABEL: dict[str, str] = {
 # Em qual bloco da análise a skill aparece. A separação existe para que
 # "projeto" nunca seja apresentado como emprego — e para que "estudo" nunca
 # desapareça da análise.
+# Cinco níveis, do mais forte ao mais fraco. A separação entre FORMAÇÃO e
+# ESTUDO existe porque bootcamp/curso concluído é evidência de coisa
+# construída e avaliada — diferente de "estou estudando agora".
 PROFESSIONAL_TYPES = frozenset({"professional", "freelance"})
 PRACTICAL_TYPES = frozenset({"production_project", "project", "academic_project", "hands_on", "knowledge"})
-LEARNED_TYPES = frozenset({"certification", "course", "study", "interest"})
+EDUCATION_TYPES = frozenset({"bootcamp", "certification", "course"})
+LEARNED_TYPES = frozenset({"study", "interest"})
 
-CATEGORY_PROFESSIONAL = "professional"
-CATEGORY_PRACTICAL = "practical"
-CATEGORY_LEARNED = "learned"
+CATEGORY_PROFESSIONAL = "professional"   # 1. experiência profissional
+CATEGORY_PRACTICAL = "practical"         # 2. experiência prática / projetos
+CATEGORY_EDUCATION = "education"         # 3. formação / bootcamp / certificação
+CATEGORY_LEARNED = "learned"             # 4. conhecimento / estudo em andamento
+#                                          5. sem evidência = ausência de Skill
 
 # Ganho máximo por acumular evidências independentes. Existe para que
 # "estudei + implementei + usei num projeto" valha mais que só "estudei",
@@ -102,6 +110,8 @@ class Evidence:
             return CATEGORY_PROFESSIONAL
         if self.type in PRACTICAL_TYPES:
             return CATEGORY_PRACTICAL
+        if self.type in EDUCATION_TYPES:
+            return CATEGORY_EDUCATION
         return CATEGORY_LEARNED
 
 

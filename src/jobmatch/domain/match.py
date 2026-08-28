@@ -53,11 +53,12 @@ class MatchResult:
     engine: str = "heuristic"          # heuristic | semantic | llm
     job_type: str = ""                 # Frontend, Full Stack, ...
     # Blocos de saída, separados por tipo de evidência (§11).
-    strengths: list[str] = field(default_factory=list)            # profissional
-    practical_experience: list[str] = field(default_factory=list)  # projetos / hands-on
-    related_knowledge: list[str] = field(default_factory=list)     # cursos / estudos
+    strengths: list[str] = field(default_factory=list)            # 1. profissional
+    practical_experience: list[str] = field(default_factory=list)  # 2. projetos / hands-on
+    education: list[str] = field(default_factory=list)             # 3. formação / bootcamp
+    related_knowledge: list[str] = field(default_factory=list)     # 4. estudo em andamento
     partial_matches: list[str] = field(default_factory=list)       # transferíveis
-    gaps: list[str] = field(default_factory=list)
+    gaps: list[str] = field(default_factory=list)                  # 5. sem evidência
     relevant_experiences: list[str] = field(default_factory=list)
     reason: str = ""
     # Diagnóstico interno, não vai para o Telegram.
@@ -65,6 +66,11 @@ class MatchResult:
     semantic_similarity: float = 0.0
     heuristic_score: float = 0.0
     emergent_bonus: float = 0.0
+    # Exigências de tempo ("3+ anos de Java") encontradas na vaga. São tratadas
+    # à parte da cobertura técnica: ter usado Java profissionalmente NÃO prova
+    # três anos de Java, e o perfil não declara tempo de experiência nenhum.
+    year_requirements: list[str] = field(default_factory=list)
+    years_penalty: float = 0.0
     hits: list[SkillHit] = field(default_factory=list)
     notes: list[str] = field(default_factory=list)
 

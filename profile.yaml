@@ -325,7 +325,16 @@ skills:
     family: frontend_spa
     aliases: [angular, angularjs, angular 2+]
     evidence:
-      - type: knowledge
+      - type: professional
+        note: >-
+          contato com projetos e clientes que utilizavam Angular durante a
+          passagem pela CoreBiz
+        source: exp_corebiz
+      - type: project
+        note: projetos próprios desenvolvidos com Angular
+      - type: bootcamp
+        note: Bootcamp Full Stack da Generation Brasil
+        source: course_generation
 
   - name: JavaScript
     family: language_web
@@ -446,15 +455,18 @@ skills:
     family: backend_node
     aliases: [node, node.js, nodejs, node js]
     evidence:
+      - type: professional
+        note: >-
+          utilizado profissionalmente — sem tempo de experiência declarado
       - type: project
-      - type: knowledge
 
   - name: Express
     family: backend_node
     aliases: [express, express.js, expressjs]
     evidence:
+      - type: professional
+        note: ecossistema backend Node utilizado profissionalmente
       - type: project
-      - type: knowledge
 
   - name: NestJS
     family: backend_node
@@ -466,18 +478,25 @@ skills:
     family: backend_java
     aliases: [java, jvm]
     evidence:
-      - type: course
-        note: bootcamp de Java
+      - type: professional
+        note: >-
+          utilizado profissionalmente — sem tempo de experiência declarado no
+          perfil (uso profissional não equivale a N anos)
       - type: project
-      - type: knowledge
+        note: projetos práticos com Java
+      - type: bootcamp
+        note: Bootcamp Full Stack da Generation Brasil
+        source: course_generation
 
   - name: Spring Boot
     family: backend_java
     aliases: [spring, spring boot, springboot]
     evidence:
-      - type: course
-        note: bootcamp de Java
       - type: project
+        note: projetos práticos com Spring Boot
+      - type: bootcamp
+        note: Bootcamp Full Stack da Generation Brasil
+        source: course_generation
 
   - name: PHP
     family: backend_php
@@ -588,8 +607,11 @@ skills:
     family: db_nosql
     aliases: [mongodb, mongo, mongoose]
     evidence:
+      - type: professional
+        note: >-
+          banco não relacional utilizado profissionalmente — sem tempo de
+          experiência declarado
       - type: project
-      - type: knowledge
 
   - name: Redis
     family: db_nosql
@@ -603,7 +625,8 @@ skills:
     family: db_nosql
     aliases: [nosql]
     evidence:
-      - type: knowledge
+      - type: professional
+        note: bancos não relacionais utilizados profissionalmente (MongoDB)
 
   # --- Infra / engenharia -----------------------------------------------------
   - name: Docker
@@ -835,8 +858,9 @@ skills:
     family: cloud
     aliases: [gcp, google cloud, google cloud platform]
     evidence:
-      - type: hands_on
-        note: "uso prático — proveniência (projeto/empresa) a confirmar"
+      - type: professional
+        note: >-
+          utilizado profissionalmente — sem tempo de experiência declarado
 
 # -----------------------------------------------------------------------------
 # EXPERIÊNCIA PROFISSIONAL
@@ -984,13 +1008,19 @@ studies:
       Make, com automações próprias construídas durante o curso: consumo de
       APIs de terceiros, webhooks e encadeamento de fluxos.
 
-  - id: course_java
-    topic: Bootcamp de Java e Spring Boot
-    level: course
-    technologies: [java, spring boot, rest apis, sql]
+  - id: course_generation
+    topic: Bootcamp Full Stack — Generation Brasil
+    level: bootcamp
+    technologies: [java, spring boot, angular, typescript, javascript,
+                   rest apis, sql, git]
+    domains: [full stack, frontend, backend, APIs, formação intensiva]
     summary: >
-      Bootcamp de desenvolvimento backend com Java e Spring Boot, incluindo
-      construção de APIs REST e integração com banco relacional.
+      Formação Full Stack intensiva da Generation Brasil, com projetos
+      construídos e avaliados ao longo do programa. Backend em Java e Spring
+      Boot com APIs REST e banco relacional; frontend em Angular com
+      TypeScript. É formação com projetos entregues — não é experiência
+      profissional remunerada, e o perfil não declara tempo de experiência
+      derivado dela.
 
   - id: course_security
     topic: Cibersegurança

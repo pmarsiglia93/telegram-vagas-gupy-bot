@@ -33,9 +33,13 @@ ANALYSIS_SCHEMA: dict = {
             "type": "array", "items": {"type": "string"},
             "description": "Requisitos cobertos por projeto próprio, POC ou hands-on",
         },
+        "education": {
+            "type": "array", "items": {"type": "string"},
+            "description": "Requisitos cobertos por formação/bootcamp/certificação concluída",
+        },
         "related_knowledge": {
             "type": "array", "items": {"type": "string"},
-            "description": "Requisitos cobertos por curso, certificação ou estudo",
+            "description": "Requisitos cobertos por estudo em andamento",
         },
         "partial_matches": {
             "type": "array", "items": {"type": "string"},
@@ -47,7 +51,7 @@ ANALYSIS_SCHEMA: dict = {
     },
     "required": [
         "score", "job_type", "strengths", "practical_experience",
-        "related_knowledge", "partial_matches", "gaps",
+        "education", "related_knowledge", "partial_matches", "gaps",
         "relevant_experiences", "reason",
     ],
     "additionalProperties": False,
@@ -67,7 +71,7 @@ Cada item do perfil vem rotulado com sua evidência. Ordem de peso:
   2. projeto próprio em produção           — construiu e roda de verdade
   3. projeto próprio / acadêmico           — construiu e publicou
   4. experimentação prática (hands-on)     — POC, laboratório
-  5. certificação / curso concluído
+  5. formação / bootcamp / certificação    — concluída, com projetos avaliados
   6. em estudo
   7. tecnologia transferível               — equivalente da mesma família
 
@@ -79,6 +83,10 @@ REGRAS INEGOCIÁVEIS
 
 2. NUNCA invente anos de experiência, empresas, cargos ou datas. Se o perfil
    não traz esse dado, ele não existe — não estime, não arredonde, não sugira.
+   Em especial: "usou X profissionalmente" NÃO é "tem N anos de X". Quando a
+   vaga exigir tempo ("3+ anos de Java") e o perfil só comprovar uso
+   profissional, trate como LACUNA PARCIAL de tempo — nunca como ausência da
+   tecnologia, e nunca afirmando um número de anos que o perfil não declara.
 
 3. Uma skill estudada ou de projeto vale MENOS que uma profissional, mas NÃO
    pode ser ignorada nem tratada como ausência. É errado concluir
@@ -109,7 +117,8 @@ CAMPOS DA RESPOSTA — a separação entre eles é o ponto central da análise
 
 - strengths: requisitos cobertos por EXPERIÊNCIA PROFISSIONAL.
 - practical_experience: cobertos por projeto próprio, POC ou hands-on.
-- related_knowledge: cobertos por curso, certificação ou estudo.
+- education: cobertos por formação, bootcamp ou certificação concluída.
+- related_knowledge: cobertos por estudo em andamento.
 - partial_matches: cobertos por tecnologia transferível. Use o formato
   "Pedida ← Equivalente que possui" (ex.: "Pinecone ← ChromaDB").
 - gaps: exigidos pela vaga e sem nenhuma relação com o perfil.
@@ -222,6 +231,7 @@ def validate_analysis(bruto: dict) -> MatchResult:
         job_type=truncate(str(bruto.get("job_type", "") or "Tecnologia"), 40),
         strengths=_lista(bruto.get("strengths")),
         practical_experience=_lista(bruto.get("practical_experience")),
+        education=_lista(bruto.get("education")),
         related_knowledge=_lista(bruto.get("related_knowledge")),
         partial_matches=_lista(bruto.get("partial_matches")),
         gaps=_lista(bruto.get("gaps")),

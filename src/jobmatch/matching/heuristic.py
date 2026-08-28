@@ -22,11 +22,17 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from ..domain.evidence import CATEGORY_LEARNED, CATEGORY_PRACTICAL, CATEGORY_PROFESSIONAL
+from ..domain.evidence import (
+    CATEGORY_EDUCATION,
+    CATEGORY_LEARNED,
+    CATEGORY_PRACTICAL,
+    CATEGORY_PROFESSIONAL,
+)
 from ..domain.job import Job, WorkModel
 from ..domain.match import MatchResult, SkillHit
 from ..domain.profile import Profile
 from ..domain.text import contains_phrase, normalize
+from .experience_years import describe, detect_year_requirements, years_penalty
 from .vocabulary import build_lookup, display_for
 
 # Pesos dos componentes do score. Renormalizados quando um componente falta
@@ -185,10 +191,18 @@ class HeuristicMatcher:
             resultado.engine = "semantic"
 
         resultado.emergent_bonus = self._emergent_bonus(resultado.hits)
+
+        # Tempo de experiência é avaliado à parte da cobertura técnica: ter
+        # usado a tecnologia profissionalmente não comprova N anos dela.
+        anos = detect_year_requirements(job.requirements_text or job.description)
+        resultado.year_requirements = describe(anos)
+        resultado.years_penalty = years_penalty(anos)
+
         score = (
             compose_score(componentes)
             + _work_model_bonus(job, self.profile)
             + resultado.emergent_bonus
+            - resultado.years_penalty
         )
         resultado.score = score
         resultado.heuristic_score = score
@@ -298,7 +312,9 @@ class HeuristicMatcher:
                 resultado.strengths.append(hit.required)
             elif hit.category == CATEGORY_PRACTICAL:
                 resultado.practical_experience.append(hit.required)
-            else:  # CATEGORY_LEARNED — curso, certificação, estudo
+            elif hit.category == CATEGORY_EDUCATION:
+                resultado.education.append(f"{hit.required} ({hit.evidence})")
+            else:  # CATEGORY_LEARNED — estudo em andamento
                 resultado.related_knowledge.append(f"{hit.required} ({hit.evidence})")
 
     def _explicar(self, job: Job, resultado: MatchResult) -> str:
@@ -319,6 +335,11 @@ class HeuristicMatcher:
             partes.append(job.work_model.label.lower())
         if not job.location_confirmed:
             partes.append("localização não confirmada")
+        if resultado.year_requirements:
+            partes.append(
+                f"vaga pede {resultado.year_requirements[0]} — o perfil comprova uso "
+                "profissional, mas não o tempo"
+            )
         if resultado.gaps:
             partes.append("gaps: " + ", ".join(resultado.gaps[:3]))
         return "; ".join(partes) + "." if partes else "Análise heurística sem requisitos detectados."
