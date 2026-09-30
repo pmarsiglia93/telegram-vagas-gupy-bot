@@ -236,13 +236,13 @@ def test_senioridade_continua_neutra(profile):
     ("São Paulo - SP", WorkModel.ONSITE, True),
     ("Curitiba - PR", WorkModel.HYBRID, False),
 ])
-def test_localizacao_continua_valendo(profile, local, modelo, valido):
+def test_localizacao_continua_valendo(profile_amplo, local, modelo, valido):
     from jobmatch.filters.eligibility import check_eligibility
 
     job = Job(source="teste", title="Frontend Developer", company="X",
               url="https://exemplo.com/1", raw_location=local, work_model=modelo,
               description="Requisitos e qualificações\nReact\nTypeScript\n")
-    assert check_eligibility(job, profile).eligible is valido
+    assert check_eligibility(job, profile_amplo).eligible is valido
 
 
 # --------------------------------------------------------------------------

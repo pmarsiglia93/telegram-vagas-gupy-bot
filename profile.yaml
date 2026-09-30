@@ -76,18 +76,58 @@ location:
   country_aliases: [brasil, brazil, br]
 
 preferences:
-  # Peso de RANKING, nunca filtro. Presencial continua elegível.
+  # Peso de RANKING entre os modelos que passam no foco. Remoto é claramente
+  # preferido: com bônus 10, remoto ganha 10 pontos, híbrido 4 e modelo não
+  # informado 2. Presencial está excluído em `focus.excluded_work_models`.
   work_models:
-    remote: 3
+    remote: 5
     hybrid: 2
-    onsite: 1
+    onsite: 0
     unknown: 1
   # Bônus máximo, em pontos absolutos do score 0-100, aplicado ao modelo preferido.
-  work_model_bonus: 4
+  work_model_bonus: 10
   # Bônus máximo para vagas que pedem competências emergentes já cobertas pelo
   # perfil (IA aplicada, RAG, automação). Pequeno de propósito: é diferencial
   # competitivo, não substituto de aderência técnica.
   emergent_bonus: 4
+
+# -----------------------------------------------------------------------------
+# FOCO — o que NÃO deve chegar no Telegram, seja qual for o score
+# -----------------------------------------------------------------------------
+# Decisões do candidato (setembro/2026, já empregado: só vale trocar por vaga
+# realmente boa). Remover esta seção inteira volta ao modo amplo, em que
+# senioridade e stack são só contexto e nada é descartado por foco.
+focus:
+  # O título precisa casar com um cargo-alvo de `roles` (Full Stack, Mobile,
+  # Front-end, Web). "Desenvolvedor", "Software Engineer" e backend puro saem.
+  require_role_in_title: true
+
+  # Níveis aceitos quando a vaga declara um (estagio, junior, pleno, senior,
+  # staff). Vaga que cita mais de um ("Pleno/Sênior") passa se aceitar pleno.
+  # Vaga SEM nível declarado sempre passa.
+  seniority:
+    accept: [pleno]
+
+  excluded_work_models: [onsite]
+
+  # Títulos que não são vaga de desenvolvimento mesmo citando front/web.
+  excluded_title_terms: [qa, tester, quality assurance, designer, ux, suporte,
+                         support, instrutor, instructor, professor, docente,
+                         tutor, mentor, monitor]
+
+  # Stack principal fora do perfil no título. Só descarta se o título NÃO
+  # citar também uma tecnologia do perfil destas famílias: "Desenvolvedor
+  # Flutter" sai, "Mobile (React Native / Flutter)" fica.
+  off_stack:
+    title_terms: [ruby, rails, ruby on rails, elixir, golang, scala, clojure,
+                  rust, c++, delphi, cobol, abap, sap, salesforce, apex,
+                  flutter, dart, swift, kotlin, ios, android, xamarin, unity]
+    unless_families: [frontend_spa, language_web, mobile, backend_node,
+                      backend_java, backend_php, backend_python, backend_dotnet]
+
+  # Agregadores e bancos de talentos que repostam vaga genérica (anúncios
+  # "REF#..." em série). Casamento por palavra no nome da empresa.
+  excluded_companies: [jobgether, bairesdev]
 
 # Famílias de tecnologia: sustentam o crédito por "tecnologia transferível".
 # Se a vaga pede Vue e o perfil tem React, ambos estão em `frontend_spa` →
@@ -1172,36 +1212,56 @@ studies:
 # -----------------------------------------------------------------------------
 # Usados na relevância de cargo e nas queries dos coletores.
 # NÃO são filtro eliminatório sozinhos — a descrição também é considerada.
+# A ordem importa: o primeiro cargo que casar com o título dá o rótulo da vaga
+# ("Full Stack React Native" é Full Stack, "Desenvolvedor React Native" é Mobile).
+# Com `focus.require_role_in_title`, título que não casa com nenhum é descartado.
 roles:
-  frontend:
-    label: Frontend
-    keywords: [front end, frontend, front-end, desenvolvedor front, ui engineer, web developer, desenvolvedor web]
-    search_terms: ["front end", "desenvolvedor front end"]
   fullstack:
     label: Full Stack
     keywords: [full stack, fullstack, full-stack]
     search_terms: ["full stack", "desenvolvedor full stack"]
-  backend:
-    label: Backend
-    keywords: [back end, backend, back-end, desenvolvedor back, api developer]
-    search_terms: ["back end", "desenvolvedor back end"]
-  software_engineer:
-    label: Software Engineer
-    keywords: [software engineer, software developer, software dev engineer, dev engineer,
-               engenheiro de software, engenheira de software, desenvolvedor de software,
-               desenvolvedor de sistemas, desenvolvimento de sistemas, engenheiro de sistemas,
-               application developer, product engineer, platform engineer,
-               programador, analista de sistemas, analista desenvolvedor,
-               analista de desenvolvimento, desenvolvedor, desenvolvedora, developer,
-               desenvolvimento, especialista em desenvolvimento,
-               principal engineer, staff engineer, tech lead, technical lead]
-    search_terms: ["software engineer", "desenvolvedor de software"]
-  ai_engineer:
-    label: AI Engineer
-    keywords: [ai engineer, ai software engineer, artificial intelligence engineer, engenheiro de ia,
-               engenheiro de inteligencia artificial, machine learning engineer, llm engineer,
-               engenheiro de automacao]
-    search_terms: ["ai engineer", "engenheiro de ia"]
+  mobile:
+    label: Mobile
+    keywords: [react native, mobile, desenvolvedor mobile, mobile developer,
+               desenvolvedor de aplicativos, app developer]
+    search_terms: ["react native", "desenvolvedor mobile"]
+  frontend:
+    label: Frontend
+    # Frameworks entram porque muita vaga de front não diz "front" no título
+    # ("Desenvolvedor(a) React - Pleno", "Desenvolvedor VTEX").
+    keywords: [front end, frontend, front-end, desenvolvedor front, ui engineer,
+               ui developer, react, reactjs, react.js, angular, vue, vue.js, vuejs,
+               next.js, nextjs, vtex]
+    search_terms: ["front end", "desenvolvedor front end", "desenvolvedor react"]
+  web:
+    label: Web
+    keywords: [desenvolvedor web, desenvolvedora web, web developer, programador web,
+               desenvolvimento web, web development, desenvolvedor javascript,
+               javascript developer]
+    search_terms: ["desenvolvedor web"]
+  # Fora do foco atual (setembro/2026). Mantidos comentados para reativar se
+  # o objetivo mudar — descomentar volta a buscá-los e a aceitá-los no título.
+  # backend:
+  #   label: Backend
+  #   keywords: [back end, backend, back-end, desenvolvedor back, api developer]
+  #   search_terms: ["back end", "desenvolvedor back end"]
+  # software_engineer:
+  #   label: Software Engineer
+  #   keywords: [software engineer, software developer, software dev engineer, dev engineer,
+  #              engenheiro de software, engenheira de software, desenvolvedor de software,
+  #              desenvolvedor de sistemas, desenvolvimento de sistemas, engenheiro de sistemas,
+  #              application developer, product engineer, platform engineer,
+  #              programador, analista de sistemas, analista desenvolvedor,
+  #              analista de desenvolvimento, desenvolvedor, desenvolvedora, developer,
+  #              desenvolvimento, especialista em desenvolvimento,
+  #              principal engineer, staff engineer, tech lead, technical lead]
+  #   search_terms: ["software engineer", "desenvolvedor de software"]
+  # ai_engineer:
+  #   label: AI Engineer
+  #   keywords: [ai engineer, ai software engineer, artificial intelligence engineer, engenheiro de ia,
+  #              engenheiro de inteligencia artificial, machine learning engineer, llm engineer,
+  #              engenheiro de automacao]
+  #   search_terms: ["ai engineer", "engenheiro de ia"]
 
 # -----------------------------------------------------------------------------
 # SINAIS DE QUE A VAGA É DE TECNOLOGIA

@@ -1,11 +1,17 @@
 """Portão de elegibilidade — o ÚNICO ponto do pipeline que descarta vagas.
 
 Princípios (§2, §3, §4, §9):
-  • Senioridade NUNCA elimina. Não há checagem de senioridade aqui, de propósito.
-  • Tecnologia "fora do stack" NUNCA elimina — vira gap no scoring.
   • Remoto vale para o Brasil inteiro.
   • Híbrido e presencial exigem São Paulo / Grande SP.
   • Localização ausente ou ambígua MANTÉM a vaga, marcada como não confirmada.
+
+Foco (`focus` no profile.yaml) — decisões do candidato, não do algoritmo:
+  • cargo fora dos cargos-alvo, senioridade fora da aceita, modelo de trabalho
+    excluído, stack principal fora do perfil e empresa bloqueada descartam.
+  • Sem a seção `focus`, nada disso descarta: senioridade e stack voltam a ser
+    só contexto e gap, como no modo amplo.
+  • Nível ou modelo NÃO informado nunca descarta — ausência de dado não é
+    evidência contra a vaga.
 """
 
 from __future__ import annotations
@@ -93,9 +99,66 @@ def _is_foreign(texto_n: str, profile: Profile) -> str:
     return ""
 
 
+def _off_stack_term(titulo_n: str, profile: Profile) -> str:
+    """Termo de stack fora do perfil no título, se nenhuma stack do perfil aparecer junto.
+
+    "Desenvolvedor Flutter" sai; "Mobile Developer (React Native / Flutter)"
+    fica, porque React Native também está no título.
+    """
+    foco = profile.focus
+    termo = next((t for t in foco.off_stack_title_terms if contains_phrase(titulo_n, t)), "")
+    if not termo:
+        return ""
+    familias = set(foco.off_stack_unless_families)
+    resgata = any(
+        contains_phrase(titulo_n, alias)
+        for alias, skill in profile.alias_index.items()
+        if skill.family in familias and len(alias) >= 2
+    )
+    return "" if resgata else termo
+
+
+def check_focus(job: Job, profile: Profile) -> Eligibility | None:
+    """Regras de foco do candidato. None = a vaga passa."""
+    foco = profile.focus
+    titulo_n = normalize(job.title)
+
+    empresa_n = normalize(job.company)
+    for empresa in foco.excluded_companies:
+        if contains_phrase(empresa_n, empresa):
+            return Eligibility(False, "empresa_excluida", detail=job.company[:40])
+
+    if job.work_model.value in foco.excluded_work_models:
+        return Eligibility(False, "modelo_excluido", detail=job.work_model.label)
+
+    excluido = next((t for t in foco.excluded_title_terms if contains_phrase(titulo_n, t)), "")
+    if excluido:
+        return Eligibility(False, "titulo_excluido", detail=excluido)
+
+    if foco.require_role_in_title and not any(
+        contains_phrase(titulo_n, kw) for role in profile.roles for kw in role.keywords
+    ):
+        return Eligibility(False, "cargo_fora_do_foco", detail=job.title[:60])
+
+    if foco.seniority_accept:
+        niveis = [n for n in job.seniority.split("/") if n != "nao informado"]
+        if niveis and not any(n in foco.seniority_accept for n in niveis):
+            return Eligibility(False, "senioridade_fora_do_foco", detail=job.seniority)
+
+    termo = _off_stack_term(titulo_n, profile)
+    if termo:
+        return Eligibility(False, "stack_fora_do_foco", detail=termo)
+
+    return None
+
+
 def check_eligibility(job: Job, profile: Profile) -> Eligibility:
     if not is_tech_job(job, profile):
         return Eligibility(False, "nao_e_tecnologia", detail=job.title[:60])
+
+    fora_do_foco = check_focus(job, profile)
+    if fora_do_foco is not None:
+        return fora_do_foco
 
     # `country` é avaliado à parte: ele tem "Brasil" como valor padrão do
     # modelo, e misturá-lo ao texto do local mascararia uma vaga estrangeira

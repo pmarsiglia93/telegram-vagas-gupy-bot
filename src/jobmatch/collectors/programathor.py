@@ -109,10 +109,11 @@ class ProgramaThorCollector(BaseCollector):
             tags=[t for t in tags if t],
             job_type=tipo,
             salary=salario,
-            # `nivel` (Júnior/Pleno/Sênior) entra como contexto na descrição,
-            # NUNCA como filtro — era exatamente esse campo que descartava
-            # vagas sênior na versão anterior.
+            # `nivel` (Júnior/Pleno/Sênior) entra como contexto na descrição e
+            # como nível declarado. Quem decide se ele descarta é o filtro de
+            # foco do profile.yaml, não o coletor.
             description=f"Nível informado pela vaga: {nivel}\n" if nivel else "",
+            declared_level=nivel,
             published_at=datetime.now(BRT),
             search_label=termo.upper(),
         )

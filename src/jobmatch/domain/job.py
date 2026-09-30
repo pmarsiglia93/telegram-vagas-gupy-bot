@@ -27,12 +27,17 @@ class WorkModel(str, Enum):
         }[self]
 
 
-# Termos de senioridade. IMPORTANTE: usados apenas como *informação contextual*.
-# Nenhum ponto do pipeline pode eliminar ou penalizar uma vaga por causa disto.
+# Termos de senioridade. O score nunca usa isto; o único consumidor que pode
+# descartar por nível é o filtro de foco (`focus.seniority` no profile.yaml).
 _SENIORITY_PATTERNS: list[tuple[str, tuple[str, ...]]] = [
     ("estagio", ("estagio", "estagiario", "intern", "internship", "trainee")),
     ("junior", ("junior", "jr", "entry level", "entry-level", "i ")),
-    ("pleno", ("pleno", "mid level", "mid-level", "midlevel", "intermediario")),
+    # "Pl." e "II" são as formas abreviadas de pleno mais comuns nos títulos
+    # ("Engenheiro de Software Pl.", "Software Engineer II", "Mid/Senior").
+    # "Semi Senior" / "SSr" é o nome de pleno nas vagas LATAM.
+    ("pleno", ("pleno", "pl", "mid", "mid level", "mid-level", "midlevel",
+               "intermediario", "ii", "semi senior", "semi-senior", "semisenior",
+               "ssr")),
     ("senior", ("senior", "sr", "sênior", "especialista", "specialist", "iii")),
     ("staff", ("staff", "principal", "lead", "tech lead", "head", "arquiteto", "architect")),
 ]
@@ -168,6 +173,9 @@ class Job:
     published_at: datetime | None = None
     external_id: str = ""
     search_label: str = ""
+    # Nível declarado num campo estruturado da fonte (ProgramaThor), usado
+    # quando o título não diz a senioridade.
+    declared_level: str = ""
     # Preenchido pelos filtros: False quando a localização é ausente/ambígua.
     location_confirmed: bool = True
     sections: dict[str, str] = field(default_factory=dict)
@@ -183,7 +191,10 @@ class Job:
 
     @property
     def seniority(self) -> str:
-        return detect_seniority(self.title)
+        do_titulo = detect_seniority(self.title)
+        if do_titulo == "nao informado" and self.declared_level:
+            return detect_seniority(self.declared_level)
+        return do_titulo
 
     @property
     def requirements_text(self) -> str:

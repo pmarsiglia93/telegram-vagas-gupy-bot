@@ -113,6 +113,27 @@ class Role:
     search_terms: tuple[str, ...]
 
 
+@dataclass(frozen=True)
+class Focus:
+    """Filtro de foco: o que o candidato NÃO quer receber, seja qual for o score.
+
+    Vazio (seção `focus` ausente) = modo amplo, nada é descartado por foco.
+    """
+
+    # Título precisa casar com algum cargo-alvo (`roles[].keywords`).
+    require_role_in_title: bool = False
+    # Níveis aceitos quando o título declara um. Título sem nível sempre passa.
+    seniority_accept: tuple[str, ...] = ()
+    excluded_work_models: tuple[str, ...] = ()
+    # Títulos que não são desenvolvimento mesmo citando um cargo-alvo ("QA Front-end").
+    excluded_title_terms: tuple[str, ...] = ()
+    # Stack principal fora do perfil. Só descarta se o título não citar também
+    # uma tecnologia das famílias em `off_stack_unless_families`.
+    off_stack_title_terms: tuple[str, ...] = ()
+    off_stack_unless_families: tuple[str, ...] = ()
+    excluded_companies: tuple[str, ...] = ()
+
+
 @dataclass
 class Profile:
     name: str
@@ -133,6 +154,7 @@ class Profile:
     items: tuple[ProfileItem, ...]
     roles: tuple[Role, ...]
     tech_signals: tuple[str, ...]
+    focus: Focus = field(default_factory=Focus)
 
     # --- índices derivados ---
 
@@ -347,6 +369,19 @@ def _build_profile(dados: dict) -> Profile:
         for chave, valor in (dados.get("roles") or {}).items()
     )
 
+    foco = dados.get("focus") or {}
+    senioridade = foco.get("seniority") or {}
+    fora_da_stack = foco.get("off_stack") or {}
+    focus = Focus(
+        require_role_in_title=bool(foco.get("require_role_in_title", False)),
+        seniority_accept=tuple(normalize(n) for n in _tuple(senioridade.get("accept"))),
+        excluded_work_models=_tuple(foco.get("excluded_work_models")),
+        excluded_title_terms=_tuple(foco.get("excluded_title_terms")),
+        off_stack_title_terms=_tuple(fora_da_stack.get("title_terms")),
+        off_stack_unless_families=_tuple(fora_da_stack.get("unless_families")),
+        excluded_companies=_tuple(foco.get("excluded_companies")),
+    )
+
     grupos: dict[str, tuple[str, ...]] = {}
     transferencia: dict[str, float] = {}
     for nome, valor in (dados.get("skill_groups") or {}).items():
@@ -378,4 +413,5 @@ def _build_profile(dados: dict) -> Profile:
         items=tuple(items),
         roles=roles,
         tech_signals=_tuple(dados.get("tech_signals")),
+        focus=focus,
     )
