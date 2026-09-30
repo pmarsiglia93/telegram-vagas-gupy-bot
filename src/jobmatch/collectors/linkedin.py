@@ -11,14 +11,17 @@ from __future__ import annotations
 import re
 from datetime import datetime
 
-from ..domain.job import Job, WorkModel, detect_work_model
+from ..domain.job import Job, detect_work_model
 from ..domain.text import strip_html
 from .base import BRT, BaseCollector
 
 BUSCA = "https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search"
 DETALHE = "https://www.linkedin.com/jobs-guest/jobs/api/jobPosting/{job_id}"
 
-# f_TPR=r259200 → últimos 3 dias | f_WT=2 → remoto
+# f_TPR=r259200 → últimos 3 dias | f_WT=2 → remoto.
+# ATENÇÃO: o endpoint guest IGNORA o f_WT (medido em 30/09/2026: f_WT=1, 2 e 3
+# devolvem exatamente as mesmas vagas). O parâmetro fica na busca por ser
+# inofensivo, mas o modelo de trabalho nunca é inferido a partir dele.
 JANELA_3_DIAS = "r259200"
 
 _ID_RE = re.compile(r"(\d{6,})(?:\?|$)")
@@ -83,7 +86,7 @@ class LinkedInCollector(BaseCollector):
                     continue
 
                 for card in cards:
-                    job = self._to_job(card, rotulo, remoto=busca["rotulo"] == "REMOTO")
+                    job = self._to_job(card, rotulo)
                     if job is None or job.url in vistos:
                         continue
                     vistos.add(job.url)
@@ -91,7 +94,7 @@ class LinkedInCollector(BaseCollector):
 
         return vagas
 
-    def _to_job(self, card, rotulo: str, remoto: bool) -> Job | None:
+    def _to_job(self, card, rotulo: str) -> Job | None:
         link_el = card.find("a", href=True)
         if not link_el:
             return None
@@ -113,9 +116,10 @@ class LinkedInCollector(BaseCollector):
             except ValueError:
                 publicada = None
 
-        # A busca com f_WT=2 devolve apenas vagas remotas; fora dela o modelo
-        # só é conhecido depois de ler a descrição.
-        modelo = WorkModel.REMOTE if remoto else detect_work_model(local, titulo)
+        # Título e local primeiro; o que ficar desconhecido é reavaliado com a
+        # descrição em `fetch_details`. Antes, tudo o que vinha da busca
+        # "REMOTO" era marcado remoto — incluindo vagas presenciais.
+        modelo = detect_work_model(local, titulo)
 
         m = _ID_RE.search(link)
         return Job(
