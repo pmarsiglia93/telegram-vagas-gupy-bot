@@ -125,6 +125,23 @@ focus:
     unless_families: [frontend_spa, language_web, mobile, backend_node,
                       backend_java, backend_php, backend_python, backend_dotnet]
 
+  # Inglês intermediário: vaga que EXIGE inglês fluente/avançado não serve.
+  # Só conta como exigência fora do bloco de diferenciais — "inglês avançado
+  # será um diferencial" passa. Descrição escrita em inglês também sai: na
+  # prática significa rotina e entrevistas em inglês.
+  english:
+    required_terms: [ingles fluente, ingles avancado, fluencia em ingles,
+                     fluente em ingles, ingles em nivel avancado,
+                     ingles nivel avancado, ingles c1, ingles c2,
+                     fluent english, fluent in english, english fluency,
+                     advanced english, english advanced, english c1, english c2,
+                     full professional proficiency]
+    # No título, a simples menção já é exigência ("Angular | Pleno | Inglês").
+    # Pagamento em dólar ("USD-based pay") é cliente estrangeiro, com rotina e
+    # entrevistas em inglês — mesmo quando a fonte traduz a descrição.
+    title_terms: [ingles, english, usd, usd-based pay]
+    exclude_english_postings: true
+
   # Agregadores e bancos de talentos que repostam vaga genérica (anúncios
   # "REF#..." em série). Casamento por palavra no nome da empresa.
   excluded_companies: [jobgether, bairesdev]

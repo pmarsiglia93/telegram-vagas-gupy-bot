@@ -306,3 +306,64 @@ def test_foco_descarta_empresa_bloqueada(profile):
 def test_sem_secao_focus_nada_e_descartado_por_foco():
     assert _build_profile({}).focus == Focus()
 
+
+# --------------------------------------------------------------------------
+# Foco — inglês acima do nível do candidato (intermediário)
+# --------------------------------------------------------------------------
+
+DESCRICAO_PT = (
+    "Sobre a vaga\nVocê vai atuar no time de produto com React e TypeScript, "
+    "desenvolvendo as telas da nossa plataforma de pagamentos para os clientes.\n"
+)
+
+
+@pytest.mark.parametrize("requisito", [
+    "Inglês fluente", "Inglês avançado para reuniões com o time global",
+    "Fluência em inglês", "Advanced English",
+])
+def test_foco_descarta_ingles_exigido(profile, requisito):
+    descricao = DESCRICAO_PT + f"Requisitos\nReact\nTypeScript\n{requisito}\n"
+    resultado = _foco(profile, "Desenvolvedor Front-end", descricao=descricao)
+    assert not resultado.eligible
+    assert resultado.reason == "ingles_exigido"
+
+
+@pytest.mark.parametrize("trecho", [
+    "Diferenciais\nInglês fluente\n",                      # seção de diferenciais
+    "Requisitos\nReact\nInglês avançado será um diferencial\n",  # na mesma linha
+    "Requisitos\nReact\nInglês intermediário\n",           # nível do candidato
+])
+def test_foco_mantem_ingles_como_diferencial_ou_intermediario(profile, trecho):
+    resultado = _foco(profile, "Desenvolvedor Front-end", descricao=DESCRICAO_PT + trecho)
+    assert resultado.eligible, resultado.reason
+
+
+@pytest.mark.parametrize("titulo", [
+    "Desenvolvedor(a) Front-end Angular | Pleno | Inglês",
+    "Full-stack Engineer Node.js + React.js + AWS (USD-based pay)",
+])
+def test_foco_descarta_ingles_no_titulo(profile, titulo):
+    resultado = _foco(profile, titulo)
+    assert not resultado.eligible
+    assert resultado.reason == "ingles_exigido"
+
+
+def test_foco_descarta_vaga_escrita_em_ingles(profile):
+    descricao = (
+        "About the role\nWe are looking for a Full Stack Engineer to join our team. "
+        "You will work with React and Node.js on the core of our product, and you "
+        "will be responsible for the quality of the code that we ship to our customers. "
+        "This is a remote role and the team is in the US, so you will talk with them "
+        "every day. We value ownership and we are an async team with a strong culture "
+        "of writing. You are expected to be comfortable with code review and to be "
+        "able to mentor on the stack that we use in the company for the product.\n"
+    )
+    resultado = _foco(profile, "Full-stack Engineer Node.js + React.js", descricao=descricao)
+    assert not resultado.eligible
+    assert resultado.reason == "vaga_em_ingles"
+
+
+def test_titulo_em_ingles_com_descricao_em_portugues_passa(profile):
+    """'Fullstack Developer | Pleno' é título comum em vaga brasileira."""
+    descricao = DESCRICAO_PT * 4 + "Requisitos\nReact\nNode.js\n"
+    assert _foco(profile, "Fullstack Developer | Pleno", descricao=descricao).eligible

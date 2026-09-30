@@ -132,6 +132,11 @@ class Focus:
     off_stack_title_terms: tuple[str, ...] = ()
     off_stack_unless_families: tuple[str, ...] = ()
     excluded_companies: tuple[str, ...] = ()
+    # Inglês acima do nível do candidato: exigência explícita (fora dos
+    # diferenciais), menção no título, ou descrição escrita em inglês.
+    english_required_terms: tuple[str, ...] = ()
+    english_title_terms: tuple[str, ...] = ()
+    exclude_english_postings: bool = False
 
 
 @dataclass
@@ -372,6 +377,7 @@ def _build_profile(dados: dict) -> Profile:
     foco = dados.get("focus") or {}
     senioridade = foco.get("seniority") or {}
     fora_da_stack = foco.get("off_stack") or {}
+    ingles = foco.get("english") or {}
     focus = Focus(
         require_role_in_title=bool(foco.get("require_role_in_title", False)),
         seniority_accept=tuple(normalize(n) for n in _tuple(senioridade.get("accept"))),
@@ -380,6 +386,9 @@ def _build_profile(dados: dict) -> Profile:
         off_stack_title_terms=_tuple(fora_da_stack.get("title_terms")),
         off_stack_unless_families=_tuple(fora_da_stack.get("unless_families")),
         excluded_companies=_tuple(foco.get("excluded_companies")),
+        english_required_terms=_tuple(ingles.get("required_terms")),
+        english_title_terms=_tuple(ingles.get("title_terms")),
+        exclude_english_postings=bool(ingles.get("exclude_english_postings", False)),
     )
 
     grupos: dict[str, tuple[str, ...]] = {}

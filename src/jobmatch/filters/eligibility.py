@@ -7,7 +7,8 @@ Princípios (§2, §3, §4, §9):
 
 Foco (`focus` no profile.yaml) — decisões do candidato, não do algoritmo:
   • cargo fora dos cargos-alvo, senioridade fora da aceita, modelo de trabalho
-    excluído, stack principal fora do perfil e empresa bloqueada descartam.
+    excluído, stack principal fora do perfil, empresa bloqueada e inglês acima
+    do nível do candidato descartam.
   • Sem a seção `focus`, nada disso descarta: senioridade e stack voltam a ser
     só contexto e gap, como no modo amplo.
   • Nível ou modelo NÃO informado nunca descarta — ausência de dado não é
@@ -22,6 +23,7 @@ from ..domain.job import Job, WorkModel
 from ..domain.profile import Profile
 from ..domain.text import contains_phrase, normalize
 from .geo import ESTADOS_BR, ESTRANGEIROS, SP_INTERIOR
+from .language import is_english_posting, required_english
 
 # Nomes que identificam a Grande SP sem ambiguidade. A sigla "SP" fica de fora
 # de propósito: sozinha ela só diz o estado, e "Campinas - SP" é estado de SP
@@ -148,6 +150,12 @@ def check_focus(job: Job, profile: Profile) -> Eligibility | None:
     termo = _off_stack_term(titulo_n, profile)
     if termo:
         return Eligibility(False, "stack_fora_do_foco", detail=termo)
+
+    termo = required_english(job, foco.english_required_terms, foco.english_title_terms)
+    if termo:
+        return Eligibility(False, "ingles_exigido", detail=termo)
+    if foco.exclude_english_postings and is_english_posting(job):
+        return Eligibility(False, "vaga_em_ingles")
 
     return None
 
