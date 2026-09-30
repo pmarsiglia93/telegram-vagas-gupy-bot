@@ -216,6 +216,48 @@ def test_ordena_por_score_depois_modelo_de_trabalho():
     assert ordenadas[1][0].work_model is WorkModel.REMOTE  # remoto na frente
 
 
+def test_selecao_respeita_nota_minima_e_teto(profile, tmp_path):
+    """Com foco, dia fraco dá zero mensagens — não as 40 menos piores."""
+    from jobmatch.config.settings import Settings
+    from jobmatch.pipeline import Pipeline
+
+    settings = Settings(db_path=str(tmp_path / "s.db"), max_jobs_per_run=2,
+                        min_score=70.0, min_coverage=0.0)
+    pipeline = Pipeline(settings, profile)
+    try:
+        candidatas = [
+            (vaga(url=f"https://a.com/{n}"), MatchResult(score=nota).finalize())
+            for n, nota in enumerate([95.0, 88.0, 75.0, 69.9, 40.0])
+        ]
+        selecionadas = pipeline.select(candidatas)
+        assert [m.score for _, m in selecionadas] == [95.0, 88.0]  # teto de 2
+        assert pipeline.metrics.abaixo_da_nota == 2
+
+        fracas = [c for c in candidatas if c[1].score < 70]
+        assert pipeline.select(fracas) == []
+    finally:
+        pipeline.close()
+
+
+def test_selecao_exige_cobertura_minima(profile, tmp_path):
+    """Nota alta sem requisitos comprovados na descrição não é vaga quente."""
+    from jobmatch.config.settings import Settings
+    from jobmatch.pipeline import Pipeline
+
+    settings = Settings(db_path=str(tmp_path / "c.db"), min_score=85.0, min_coverage=0.7)
+    pipeline = Pipeline(settings, profile)
+    try:
+        def cand(n, nota, cobertura):
+            m = MatchResult(score=nota).finalize()
+            m.required_coverage = cobertura
+            return (vaga(url=f"https://c.com/{n}"), m)
+
+        selecionadas = pipeline.select([cand(1, 95, 0.9), cand(2, 92, 0.59), cand(3, 90, 0.0)])
+        assert [m.score for _, m in selecionadas] == [95]
+    finally:
+        pipeline.close()
+
+
 # --------------------------------------------------------------------------
 # §18 — mensagem do Telegram
 # --------------------------------------------------------------------------

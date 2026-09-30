@@ -50,7 +50,14 @@ class Settings:
 
     # --- Coleta ---
     max_age_days: int = 3
-    max_jobs_per_run: int = 40
+    max_jobs_per_run: int = 8
+    # Nota mínima para envio. Abaixo dela a vaga é analisada mas não enviada:
+    # com o bot em modo foco, um dia sem nada bom deve dar zero mensagens.
+    min_score: float = 85.0
+    # Fração mínima dos requisitos obrigatórios com aderência. O score sozinho
+    # é generoso com vaga do cargo certo; isto exige que a descrição comprove.
+    # Vaga sem descrição legível tem cobertura 0 e não passa.
+    min_coverage: float = 0.70
 
     # --- Embeddings / RAG ---
     embedding_provider: str = "hashing"   # hashing | openai | gemini
@@ -93,7 +100,9 @@ def load_settings() -> Settings:
         db_path=os.getenv("DB_PATH", os.path.join(RAIZ, "vagas_gupy.db")),
         profile_path=os.getenv("PROFILE_PATH", os.path.join(RAIZ, "profile.yaml")),
         max_age_days=_int("MAX_AGE_DAYS", 3),
-        max_jobs_per_run=_int("MAX_JOBS_PER_RUN", 40),
+        max_jobs_per_run=_int("MAX_JOBS_PER_RUN", 8),
+        min_score=float(os.getenv("MIN_SCORE", "85") or 85),
+        min_coverage=float(os.getenv("MIN_COVERAGE", "0.70") or 0.70),
         embedding_provider=os.getenv("EMBEDDING_PROVIDER", "hashing").strip().lower(),
         embedding_model=os.getenv("EMBEDDING_MODEL", ""),
         vector_store=os.getenv("VECTOR_STORE", "memory").strip().lower(),

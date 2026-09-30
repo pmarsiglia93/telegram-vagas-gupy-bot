@@ -41,6 +41,7 @@ class Metrics:
     duplicadas: int = 0
     descartadas: int = 0
     analisadas: int = 0
+    abaixo_da_nota: int = 0
     enviadas: int = 0
     chamadas_embedding: int = 0
     chamadas_llm: int = 0
@@ -224,16 +225,32 @@ class Pipeline:
 
         return candidatas
 
+    def select(self, candidatas: list[tuple[Job, MatchResult]]) -> list[tuple[Job, MatchResult]]:
+        """Etapa 8: só acima da nota e da cobertura mínimas, no máximo N — as melhores primeiro.
+
+        Compartilhado com o diagnóstico para que ele meça a mesma seleção do envio.
+        """
+        s = self.settings
+        qualificadas = [
+            (j, m) for j, m in candidatas
+            if m.score >= s.min_score and m.required_coverage >= s.min_coverage
+        ]
+        self.metrics.abaixo_da_nota = len(candidatas) - len(qualificadas)
+        return qualificadas[: self.settings.max_jobs_per_run]
+
     def run(self) -> Metrics:
         inicio = time.monotonic()
         candidatas = self.prepare()
 
         # 8. Envio, do melhor para o pior
-        selecionadas = candidatas[: self.settings.max_jobs_per_run]
+        selecionadas = self.select(candidatas)
+        nota = self.settings.min_score
         if not selecionadas:
-            print("\n📭 Nenhuma vaga qualificada para envio nesta execução.")
+            print(f"\n📭 Nenhuma vaga com nota ≥ {nota:.0f} e cobertura ≥ "
+                  f"{self.settings.min_coverage:.0%} nesta execução.")
         else:
-            print(f"\n📨 Enviando {len(selecionadas)} de {len(candidatas)} candidatas...")
+            print(f"\n📨 Enviando {len(selecionadas)} vaga(s) com nota ≥ {nota:.0f} "
+                  f"({len(candidatas)} analisadas, {self.metrics.abaixo_da_nota} abaixo da nota)...")
 
         for job, match in selecionadas:
             # A vaga só é marcada como enviada se o Telegram confirmar. Falha
@@ -268,6 +285,7 @@ class Pipeline:
             f"   duplicadas ........... {m.duplicadas}",
             f"   descartadas .......... {m.descartadas}",
             f"   analisadas ........... {m.analisadas}",
+            f"   abaixo do corte ...... {m.abaixo_da_nota}",
             f"   enviadas ............. {m.enviadas}",
             f"   descrições buscadas .. {m.detalhes_buscados}",
             f"   chamadas embedding ... {m.chamadas_embedding}",

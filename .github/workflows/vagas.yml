@@ -57,8 +57,8 @@ jobs:
           fi
 
       - name: Rodar testes
-        # As regras críticas (senioridade não elimina, localização por modelo
-        # de trabalho) são verificadas antes de qualquer envio.
+        # As regras críticas (filtro de foco, localização por modelo de
+        # trabalho) são verificadas antes de qualquer envio.
         run: python -m pytest tests/ -q
 
       - name: Executar bot
@@ -70,9 +70,11 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           LLM_PROVIDER: ${{ vars.LLM_PROVIDER || 'none' }}
-          # Teto de mensagens por execução. Ajustável sem mexer no código pela
-          # variável MAX_JOBS_PER_RUN do repositório.
-          MAX_JOBS_PER_RUN: ${{ vars.MAX_JOBS_PER_RUN || '15' }}
+          # Teto de mensagens por execução e nota mínima para envio. Ajustáveis
+          # sem mexer no código pelas variáveis do repositório.
+          MAX_JOBS_PER_RUN: ${{ vars.MAX_JOBS_PER_RUN || '8' }}
+          MIN_SCORE: ${{ vars.MIN_SCORE || '85' }}
+          MIN_COVERAGE: ${{ vars.MIN_COVERAGE || '0.70' }}
           LLM_MODEL: ${{ vars.LLM_MODEL }}
           LLM_MAX_JOBS: ${{ vars.LLM_MAX_JOBS || '15' }}
           EMBEDDING_PROVIDER: ${{ vars.EMBEDDING_PROVIDER || 'hashing' }}

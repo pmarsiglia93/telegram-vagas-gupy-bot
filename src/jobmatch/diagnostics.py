@@ -75,7 +75,8 @@ def diagnose(settings: Settings) -> int:
     print(_linha("banco", True, settings.db_path.split("/")[-1]))
     print(f"     embeddings={settings.embedding_provider}  vector_store={settings.vector_store}  "
           f"llm={settings.llm_provider}")
-    print(f"     max_jobs_per_run={settings.max_jobs_per_run}  max_age_days={settings.max_age_days}")
+    print(f"     max_jobs_per_run={settings.max_jobs_per_run}  min_score={settings.min_score:.0f}  "
+          f"min_coverage={settings.min_coverage:.0%}  max_age_days={settings.max_age_days}")
 
     # --- Credenciais do Telegram (sem enviar nada) ------------------------
     print("\n[3/5] Credenciais do Telegram")
@@ -92,7 +93,7 @@ def diagnose(settings: Settings) -> int:
     try:
         candidatas = pipeline.prepare()
         m = pipeline.metrics
-        selecionadas = candidatas[: settings.max_jobs_per_run]
+        selecionadas = pipeline.select(candidatas)
 
         print()
         print(_linha("busca de vagas", m.coletadas > 0, f"{m.coletadas} coletadas"))
@@ -101,7 +102,8 @@ def diagnose(settings: Settings) -> int:
         print(_linha("filtros", True,
                      f"{m.analisadas} elegíveis ({m.descartadas} descartadas)"))
         print(_linha("selecionadas p/ envio", len(selecionadas) > 0,
-                     f"{len(selecionadas)} de {len(candidatas)} candidatas"))
+                     f"{len(selecionadas)} de {len(candidatas)} candidatas "
+                     f"({m.abaixo_da_nota} abaixo do corte)"))
         if candidatas:
             melhor = max(c[1].score for c in candidatas)
             print(f"     melhor score: {melhor:.1f}%")
@@ -127,7 +129,10 @@ def diagnose(settings: Settings) -> int:
     elif m.analisadas == 0:
         problemas.append("todas as vagas foram descartadas pelos filtros de elegibilidade")
     elif not selecionadas:
-        problemas.append("nenhuma vaga sobrou após ordenação/limite")
+        # Com nota mínima, um dia sem vaga boa é resultado legítimo, não falha.
+        print(f"  {ALERTA}nenhuma vaga atingiu o corte (nota {settings.min_score:.0f}, "
+              f"cobertura {settings.min_coverage:.0%}) — normal em dia fraco; ajuste "
+              "MIN_SCORE/MIN_COVERAGE se acontecer sempre")
 
     if problemas:
         for p in problemas:
