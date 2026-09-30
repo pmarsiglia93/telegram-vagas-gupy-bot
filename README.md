@@ -28,14 +28,14 @@ O JobMatch AI responde a outra:
 | | Antes | Agora |
 |---|---|---|
 | **Matching** | contagem de substring no título | requisitos da descrição, ponderados por nível de evidência + similaridade semântica + LLM |
-| **Senioridade** | vaga "Sênior" era **descartada** | informação contextual, peso zero no score |
+| **Senioridade** | vaga "Sênior" era **descartada** | peso zero no score; filtro só pelo `focus` do perfil (hoje: Pleno) |
 | **Stack fora do perfil** | `.NET`/`Kafka` no título **descartava** a vaga | vira um *gap* nomeado na mensagem |
 | **Localização** | `"sp" in local` (casava com "Ja**sp**ion") | por token, com regra própria para remoto / híbrido / presencial |
-| **Modelos de trabalho** | só remoto e SP | remoto, híbrido e presencial — preferência de ranking, não filtro |
-| **Cargos buscados** | front end, full stack | + backend, software engineer, AI engineer |
+| **Modelos de trabalho** | só remoto e SP | remoto (Brasil) e híbrido (Grande SP), remoto bem à frente no ranking; presencial excluído pelo `focus` |
+| **Cargos buscados** | front end, full stack | full stack, front-end, web e mobile (React Native) |
 | **Deduplicação** | URL exata | URL + *fingerprint* (empresa + cargo normalizado + cidade) |
-| **Envio** | em streaming, sem ordem | tudo coletado, pontuado e **ordenado** antes de enviar |
-| **Testes** | nenhum | 169 testes cobrindo as regras críticas |
+| **Envio** | em streaming, sem ordem | tudo coletado, pontuado e **ordenado**; só acima da nota e da cobertura mínimas, até 8 por execução |
+| **Testes** | nenhum | 279 testes cobrindo as regras críticas |
 
 Efeito medido numa execução real: **140 vagas analisadas** contra as ~4 buscas
 com filtros eliminatórios da versão anterior.
@@ -88,7 +88,7 @@ src/jobmatch/
   notifications/telegram.py
   persistence/sqlite.py
   pipeline.py                # orquestração
-tests/                       # 169 testes
+tests/                       # 279 testes
 ```
 
 **Divisão de responsabilidades entre os bancos (§14):** o SQLite continua dono
@@ -160,7 +160,7 @@ core 0.50 (requisitos obrigatórios, ponderados por evidência)
 nice 0.12 (diferenciais)
 role 0.18 (aderência de cargo)
 semantic 0.20 (similaridade perfil × vaga)
-+ bônus de modelo de trabalho (remoto 4 · híbrido ~2,7 · presencial ~1,3)
++ bônus de modelo de trabalho (remoto 10 · híbrido 4 · não informado 2)
 + bônus de competência emergente (até 4, só com cobertura real)
 ```
 
@@ -169,8 +169,9 @@ a 2 requisitos. Uma descrição que lista 2 tecnologias diz muito menos sobre a
 vaga do que uma que lista 10 — sem isso, "100% de aderência" sobre 2 requisitos
 valeria o mesmo que sobre 10, e descrição magra viraria score inflado.
 
-O bônus de modelo é sempre não-negativo: presencial ganha menos, nunca perde
-pontos. Senioridade não entra em nenhum componente.
+O bônus de modelo é sempre não-negativo: o modelo menos preferido ganha
+menos, nunca perde pontos. Senioridade não entra em nenhum componente — quem
+decide nível é o filtro de foco, antes do score.
 
 | Score | Classificação |
 |---|---|
@@ -181,7 +182,11 @@ pontos. Senioridade não entra em nenhum componente.
 | 50–59 | 🟡 Possível oportunidade |
 | < 50 | ⚪ Baixa compatibilidade |
 
-> Nesta versão o score **ordena, prioriza e explica** — não descarta.
+> O score **ordena, prioriza e explica**. O corte de envio usa dois números:
+> nota mínima (`MIN_SCORE`, padrão 85) e cobertura mínima dos requisitos
+> obrigatórios (`MIN_COVERAGE`, padrão 70%). O score sozinho é generoso com
+> vaga do cargo certo; a cobertura exige que a descrição comprove a aderência.
+> Vaga sem descrição legível tem cobertura 0 e não é enviada.
 
 ### Calibração
 
@@ -204,12 +209,45 @@ python tools/db.py execucoes    # histórico de execuções
 ```
 REMOTO      → Brasil inteiro
 HÍBRIDO     → São Paulo / Grande SP
-PRESENCIAL  → São Paulo / Grande SP
+PRESENCIAL  → São Paulo / Grande SP   (hoje excluído pelo foco)
 Localização ausente ou ambígua → MANTÉM, marcada como "não confirmada"
 ```
 
-Só três coisas descartam uma vaga: não ser de tecnologia, ser estrangeira, ou
-ser híbrida/presencial numa cidade identificável fora da Grande SP.
+As regras-base descartam só três coisas: não ser de tecnologia, ser
+estrangeira, ou ser híbrida/presencial numa cidade identificável fora da
+Grande SP.
+
+### Modo foco (`focus` no profile.yaml)
+
+Por cima das regras-base, a seção `focus` guarda as **escolhas do candidato**:
+o que não deve chegar, seja qual for o score. A configuração atual reflete o
+momento de quem já está empregado e só quer trocar por vaga realmente boa:
+
+| Regra | Configuração atual | Motivo no log |
+|---|---|---|
+| Cargo no título | Full Stack, Mobile, Front-end ou Web (`roles`) | `cargo_fora_do_foco` |
+| Senioridade | só Pleno; título sem nível declarado passa | `senioridade_fora_do_foco` |
+| Modelo de trabalho | presencial excluído | `modelo_excluido` |
+| Stack principal | Ruby, Flutter, Swift, Kotlin, Go... fora, **a menos que** o título cite também uma stack do perfil | `stack_fora_do_foco` |
+| Título | QA, designer, suporte, instrutor... | `titulo_excluido` |
+| Empresa | agregadores (Jobgether, BairesDev) | `empresa_excluida` |
+| Inglês | exige fluente/avançado (fora dos diferenciais), "Inglês"/"USD" no título | `ingles_exigido` |
+| Idioma da vaga | descrição escrita em inglês | `vaga_em_ingles` |
+
+Dado ausente nunca descarta: vaga sem nível ou sem modelo informado passa, e o
+score decide. Remover a seção `focus` volta ao modo amplo, em que senioridade e
+stack são só contexto e gap. Os motivos aparecem no resumo de cada execução,
+então dá para ver se o foco está cortando demais.
+
+Numa execução real (30/09/2026), das 89 vagas novas, 11 passaram no foco:
+34 saíram por senioridade, 23 por cargo, 10 por empresa, 5 por serem
+presenciais e 4 por inglês. Das 11, o corte de nota/cobertura deixou 8.
+
+> **LinkedIn e "remoto":** o endpoint guest do LinkedIn ignora o filtro
+> `f_WT` — remoto, híbrido e presencial devolvem as mesmas vagas. Antes, tudo
+> o que vinha da busca "remota" era marcado como remoto; agora o modelo sai do
+> título, do local e da descrição, e o que não der para saber fica como "não
+> informado".
 
 ---
 
@@ -282,7 +320,9 @@ Copie [`.env.example`](.env.example) para `.env`. Nenhum segredo fica no código
 | `TELEGRAM_TOKEN` | — | **Obrigatório.** Token do [@BotFather](https://t.me/botfather) |
 | `CHAT_ID_GRUPO` | — | **Obrigatório.** ID do grupo/canal |
 | `MAX_AGE_DAYS` | `3` | Idade máxima da vaga |
-| `MAX_JOBS_PER_RUN` | `40` | Teto de mensagens por execução |
+| `MAX_JOBS_PER_RUN` | `8` | Teto de mensagens por execução |
+| `MIN_SCORE` | `85` | Nota mínima para envio; dia sem vaga boa dá zero mensagens |
+| `MIN_COVERAGE` | `0.70` | Fração mínima dos requisitos obrigatórios com aderência |
 | `EMBEDDING_PROVIDER` | `hashing` | `hashing` (local) · `openai` · `gemini` |
 | `VECTOR_STORE` | `memory` | `memory` · `chroma` |
 | `LLM_PROVIDER` | `none` | `none` · `anthropic` · `openai` · `gemini` |
@@ -372,8 +412,9 @@ pip install -r requirements-dev.txt
 python -m pytest tests/ -q
 ```
 
-Cobrem as regras que não podem regredir: senioridade não elimina nem penaliza,
-localização por modelo de trabalho, matching por descrição, estudo não vira
+Cobrem as regras que não podem regredir: sem foco, senioridade não elimina;
+com foco, cada regra descarta só o que deve; senioridade nunca penaliza o
+score; inglês exigido vs. diferencial; nota, cobertura e teto de envio; localização por modelo de trabalho, matching por descrição, estudo não vira
 ponto forte, validação da saída do LLM, deduplicação entre fontes, ordenação e
 limite de tamanho da mensagem.
 
