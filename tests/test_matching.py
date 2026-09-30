@@ -76,8 +76,12 @@ def test_gaps_sao_nomeados_nao_eliminatorios(matcher):
     resultado_kafka = matcher.match(vaga(descricao=DESCRICAO_COMPLETA + "\nKafka\n"))
     assert "Kafka" in resultado_kafka.gaps
     assert resultado_kafka.score > 0
-    # AWS tem evidência de estudo no perfil: nunca deveria ser gap silencioso.
-    assert "AWS" in " ".join(resultado.related_knowledge + resultado.gaps + resultado.partial_matches)
+    # AWS tem evidência no perfil (uso prático + estudo): nunca deveria ser gap
+    # silencioso — aparece em algum bloco nomeado da mensagem.
+    assert "AWS" in " ".join(
+        resultado.practical_experience + resultado.related_knowledge
+        + resultado.gaps + resultado.partial_matches
+    )
     assert resultado.score > 0
 
 

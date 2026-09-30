@@ -74,11 +74,18 @@ def test_vaga_java_spring_mongo_gcp_angular_tem_fit_alto(profile):
 
 def test_bootcamp_e_categoria_propria(profile):
     """Formação concluída é evidência distinta de 'estou estudando'."""
+    from jobmatch.domain.evidence import Evidence
+    from jobmatch.domain.profile import Skill
+
+    # Spring Boot tem bootcamp declarado no perfil real...
     spring = next(s for s in profile.skills if s.name == "Spring Boot")
     assert any(e.type == "bootcamp" for e in spring.evidence)
-    assert spring.category != CATEGORY_PROFESSIONAL
-    # Spring Boot: projeto + bootcamp -> prático, mas com formação declarada.
     assert "formação/bootcamp" in spring.evidence_summary()
+    # ...mas também uso profissional, então a regra é verificada isolada:
+    # projeto + bootcamp -> prático, com formação declarada, nunca profissional.
+    so_formacao = Skill("X", "outros", (), (Evidence("project"), Evidence("bootcamp")))
+    assert so_formacao.category != CATEGORY_PROFESSIONAL
+    assert "formação/bootcamp" in so_formacao.evidence_summary()
 
 
 def test_formacao_nao_vira_experiencia_profissional(profile):

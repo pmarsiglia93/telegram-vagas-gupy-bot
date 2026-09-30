@@ -162,9 +162,9 @@ def test_caso_4_pinecone_nao_e_gap_completo(profile):
 def test_caso_5_react_profissional_pesa_mais_que_academico(profile):
     """Experiência profissional continua sendo a evidência mais forte.
 
-    O contraponto aqui é Spring Boot (projeto + bootcamp, sem uso profissional
-    declarado). Java deixou de servir como contraponto porque passou a ter
-    evidência profissional no perfil.
+    O contraponto aqui é C#/.NET (só projeto próprio). Java e Spring Boot
+    deixaram de servir como contraponto porque passaram a ter evidência
+    profissional no perfil (backend da CoreBiz, conforme o CV).
     """
     matcher = HeuristicMatcher(profile)
     resultado = matcher.match(
@@ -173,15 +173,15 @@ def test_caso_5_react_profissional_pesa_mais_que_academico(profile):
 
     assert "React" in resultado.strengths
     hit_react = next(h for h in resultado.hits if h.required == "React")
-    hit_spring = next(
-        (h for h in matcher.match(vaga("Backend", ["Spring Boot", "Java"])).hits
-         if h.required == "Spring Boot"), None,
+    hit_dotnet = next(
+        (h for h in matcher.match(vaga("Backend", ["C#", ".NET"])).hits
+         if h.required == "C# / .NET"), None,
     )
-    assert hit_spring is not None
-    assert hit_react.coverage > hit_spring.coverage, \
-        "React (profissional) tem de pesar mais que Spring Boot (projeto + bootcamp)"
+    assert hit_dotnet is not None
+    assert hit_react.coverage > hit_dotnet.coverage, \
+        "React (profissional) tem de pesar mais que C#/.NET (projeto próprio)"
     assert hit_react.category == "professional"
-    assert hit_spring.category != "professional"
+    assert hit_dotnet.category != "professional"
 
 
 def test_fastapi_e_transferivel_de_python(profile):

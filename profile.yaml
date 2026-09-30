@@ -29,7 +29,7 @@
 
 identity:
   name: Paulo Marsiglia
-  headline: Desenvolvedor Front-End / Full Stack — em transição para AI Engineer
+  headline: Desenvolvedor Full Stack Pleno — React, Angular, Vue.js, Node.js e Java
 
 location:
   city: São Paulo
@@ -100,6 +100,7 @@ families:
   backend_java:      Backend em Java
   backend_php:       Backend em PHP
   backend_python:    Backend em Python
+  backend_dotnet:    Backend em .NET
   api:               Integração e contratos de API
   db_sql:            Bancos relacionais
   db_nosql:          Bancos não relacionais
@@ -161,6 +162,11 @@ skill_groups:
   python_backend:
     transfer_factor: 0.65
     members: [python, django, fastapi, flask, tornado, celery, pydantic]
+
+  dotnet_backend:
+    transfer_factor: 0.65
+    members: [c#, csharp, .net, dotnet, .net core, asp.net, asp.net core,
+              entity framework, ef core, blazor]
 
   relational_databases:
     transfer_factor: 0.70
@@ -255,7 +261,8 @@ skill_groups:
   testing:
     transfer_factor: 0.65
     members: [jest, vitest, cypress, playwright, testing library, pytest,
-              testes automatizados, testes unitarios, unit test, tdd, e2e]
+              xunit, junit, supertest, testes automatizados, testes unitarios,
+              unit test, tdd, e2e]
 
   ecommerce_platforms:
     transfer_factor: 0.45
@@ -290,8 +297,9 @@ skills:
     evidence:
       - type: academic_project
         note: >-
-          TCC do MBA na USP: app mobile validado pelo Sebrae, aprovado em
-          aceleradora de startups, nota máxima no MBA
+          LazerSP, TCC do MBA na USP/ESALQ: app mobile em React Native com
+          Expo e API em Node.js/SQLite, nota 10 e selecionado para o Sebrae
+          ESX 2026
         source: proj_mba_react_native
 
   # --- Frontend ---------------------------------------------------------------
@@ -326,12 +334,11 @@ skills:
     aliases: [angular, angularjs, angular 2+]
     evidence:
       - type: professional
-        note: >-
-          contato com projetos e clientes que utilizavam Angular durante a
-          passagem pela CoreBiz
+        note: interfaces em Angular com TypeScript para clientes da CoreBiz
         source: exp_corebiz
       - type: project
-        note: projetos próprios desenvolvidos com Angular
+        note: frontend em Angular 17 do Kanban IA
+        source: proj_kanban_ia
       - type: bootcamp
         note: Bootcamp Full Stack da Generation Brasil
         source: course_generation
@@ -417,6 +424,9 @@ skills:
       - type: professional
         note: manutenção de lojas legadas na CoreBiz
         source: exp_corebiz
+      - type: freelance
+        note: correção de bugs em produção no e-commerce da CervejaBox
+        source: exp_cervejabox
 
   - name: Deco CMS
     family: ecommerce
@@ -456,9 +466,11 @@ skills:
     aliases: [node, node.js, nodejs, node js]
     evidence:
       - type: professional
-        note: >-
-          utilizado profissionalmente — sem tempo de experiência declarado
+        note: serviços de backend nas plataformas educacionais da EAC/Barkeley
+        source: exp_eac_barkeley
       - type: project
+        note: API da plataforma Consultas e do LazerSP
+        source: proj_consultas
 
   - name: Express
     family: backend_node
@@ -472,7 +484,33 @@ skills:
     family: backend_node
     aliases: [nestjs, nest.js, nest js]
     evidence:
-      - type: knowledge
+      - type: project
+        note: API da plataforma Consultas, com TypeORM, BullMQ e 59 testes
+        source: proj_consultas
+
+  - name: TypeORM
+    family: backend_node
+    aliases: [typeorm]
+    evidence:
+      - type: project
+        note: camada de dados da plataforma Consultas sobre PostgreSQL
+        source: proj_consultas
+
+  - name: WebSockets
+    family: api
+    aliases: [websocket, websockets, socket.io, socketio]
+    evidence:
+      - type: project
+        note: eventos em tempo real com Socket.io na plataforma Consultas
+        source: proj_consultas
+
+  - name: Filas assíncronas
+    family: backend_node
+    aliases: [bullmq, filas assincronas, message queue, fila de mensagens]
+    evidence:
+      - type: project
+        note: processamento assíncrono com BullMQ e Redis na plataforma Consultas
+        source: proj_consultas
 
   - name: Java
     family: backend_java
@@ -480,10 +518,12 @@ skills:
     evidence:
       - type: professional
         note: >-
-          utilizado profissionalmente — sem tempo de experiência declarado no
-          perfil (uso profissional não equivale a N anos)
+          contribuição no backend Java da CoreBiz — sem tempo de experiência
+          declarado (uso profissional não equivale a N anos)
+        source: exp_corebiz
       - type: project
-        note: projetos práticos com Java
+        note: microsserviços em Java 21 no Kanban IA
+        source: proj_kanban_ia
       - type: bootcamp
         note: Bootcamp Full Stack da Generation Brasil
         source: course_generation
@@ -492,8 +532,12 @@ skills:
     family: backend_java
     aliases: [spring, spring boot, springboot]
     evidence:
+      - type: professional
+        note: contribuição no backend Java/Spring Boot da CoreBiz
+        source: exp_corebiz
       - type: project
-        note: projetos práticos com Spring Boot
+        note: microsserviços com Spring Boot no Kanban IA
+        source: proj_kanban_ia
       - type: bootcamp
         note: Bootcamp Full Stack da Generation Brasil
         source: course_generation
@@ -532,6 +576,17 @@ skills:
       - type: professional
         note: backend da aplicação de chat/IA na Stalse Analytics
         source: exp_stalse
+
+  - name: C# / .NET
+    family: backend_dotnet
+    aliases: [c#, csharp, .net, dotnet, .net core, .net 8, asp.net, asp.net core,
+              entity framework, ef core]
+    evidence:
+      - type: project
+        note: >-
+          Catálogo e Estoque API em ASP.NET Core com Clean Architecture e
+          Entity Framework Core — projeto próprio, sem uso profissional
+        source: proj_catalogo_api
 
   # --- APIs -------------------------------------------------------------------
   - name: REST APIs
@@ -595,6 +650,14 @@ skills:
         note: PostgreSQL na Stalse e MySQL na EAC/Barkeley
         source: exp_eac_barkeley
 
+  - name: SQL Server
+    family: db_sql
+    aliases: [sql server, sqlserver, mssql]
+    evidence:
+      - type: project
+        note: banco da Catálogo e Estoque API
+        source: proj_catalogo_api
+
   - name: SQLite
     family: db_sql
     aliases: [sqlite, sqlite3]
@@ -654,10 +717,12 @@ skills:
     family: cicd
     aliases: [ci/cd, ci cd, cicd, integracao continua, entrega continua, pipeline]
     evidence:
+      - type: professional
+        note: entregas publicadas pelos pipelines de CI/CD dos clientes na CoreBiz
+        source: exp_corebiz
       - type: production_project
         note: pipeline agendado do JobMatch AI rodando em produção
         source: proj_jobmatch_ai
-      - type: knowledge
 
   - name: GitHub Actions
     family: cicd
@@ -669,10 +734,14 @@ skills:
 
   - name: Arquitetura de software
     family: engineering
-    aliases: [arquitetura de software, clean code, solid, design patterns,
-              microservicos, microsservicos, camadas, separacao de responsabilidades]
+    aliases: [arquitetura de software, clean code, clean architecture, solid,
+              design patterns, microservicos, microsservicos, micro frontends,
+              micro-frontends, microfrontends, camadas,
+              separacao de responsabilidades]
     evidence:
       - type: professional
+        note: microsserviços e micro frontends sobre VTEX IO na Quality Digital
+        source: exp_quality_digital
       - type: production_project
         note: arquitetura em camadas com providers plugáveis no JobMatch AI
         source: proj_jobmatch_ai
@@ -680,8 +749,15 @@ skills:
   # --- Testes -----------------------------------------------------------------
   - name: Testes automatizados
     family: testing
-    aliases: [jest, testes automatizados, testes unitarios, unit test, pytest, tdd]
+    aliases: [jest, testes automatizados, testes unitarios, unit test, pytest, tdd,
+              xunit, junit, supertest]
     evidence:
+      - type: professional
+        note: testes unitários com Jest nas entregas da CoreBiz
+        source: exp_corebiz
+      - type: project
+        note: 59 testes com Jest na plataforma Consultas e xUnit na Catálogo API
+        source: proj_consultas
       - type: production_project
         note: suíte de testes cobrindo as regras críticas do JobMatch AI
         source: proj_jobmatch_ai
@@ -846,12 +922,22 @@ skills:
     family: cloud
     aliases: [aws, amazon web services]
     evidence:
+      - type: hands_on
+        note: >-
+          validação de aplicações em ambiente AWS na rotina da Quality Digital
+          — contato de uso, não operação de infraestrutura
+        source: exp_quality_digital
       - type: study
 
   - name: Azure
     family: cloud
     aliases: [azure, microsoft azure]
     evidence:
+      - type: hands_on
+        note: >-
+          validação de aplicações em ambiente Azure na rotina da Quality
+          Digital — contato de uso, não operação de infraestrutura
+        source: exp_quality_digital
       - type: study
 
   - name: GCP
@@ -874,7 +960,7 @@ experiences:
     company: CoreBiz
     role: Desenvolvedor Front-End
     period: "maio/2022 a julho/2024"
-    technologies: [React, JavaScript, TypeScript, VTEX IO, VTEX Legacy,
+    technologies: [React, Angular, JavaScript, TypeScript, VTEX IO, VTEX Legacy,
                    GraphQL, REST APIs, HTML, CSS, SCSS, Git]
     domains: [frontend, e-commerce, enterprise, web development,
               integrações, APIs, alto volume transacional]
@@ -884,8 +970,8 @@ experiences:
       incluindo marcas como Motorola, Aramis, O Boticário e Chilli Beans.
       Participação em operações de e-commerce com volume transacional
       relevante, superiores a R$ 100 mil por dia. Construção de interfaces em
-      React com TypeScript, consumo de APIs REST e GraphQL, e integrações entre
-      a plataforma e sistemas dos clientes.
+      React e Angular com TypeScript, consumo de APIs REST e GraphQL, e
+      integrações entre a plataforma e sistemas dos clientes.
 
   - id: exp_stalse
     company: Stalse Analytics
@@ -900,37 +986,54 @@ experiences:
       backend, com PostgreSQL e Redis. Participação em produto com
       funcionalidades de chat e IA, incluindo integração profissional com a API
       da OpenAI para geração de respostas. Desenvolvimento e consumo de APIs
-      REST entre frontend e backend.
+      REST entre frontend e backend. O chatbot com a API do ChatGPT contribuiu
+      para 3.000 matrículas em 24 horas.
 
   - id: exp_quality_digital
     company: Quality Digital
     role: Desenvolvedor Front-End
     period: "junho/2025 a dezembro/2025"
     technologies: [VTEX IO, Deco CMS, Deno, Preact, Tailwind CSS, TailwindCSS,
-                   JavaScript, TypeScript, Git]
+                   JavaScript, TypeScript, REST APIs, microsserviços,
+                   micro frontends, AWS, Azure, Git]
     domains: [frontend, e-commerce, LATAM, enterprise, web development,
-              alto tráfego, performance]
+              alto tráfego, performance, microsserviços, micro frontends]
     summary: >
       Desenvolvimento e manutenção de e-commerces da Electrolux e Frigidaire na
       América Latina. Atuação sobre VTEX IO e Deco CMS (deco.cx), com Deno,
       Preact e Tailwind CSS. Participação na preparação das aplicações para
       períodos críticos de tráfego como a Black Friday, com foco em estabilidade
-      e performance sob alta carga.
+      e performance sob alta carga. Arquitetura de microsserviços e micro
+      frontends sobre VTEX IO, integração com APIs REST de conteúdo e comércio,
+      validação das aplicações em ambiente AWS e Azure e colaboração com times
+      de vários países da América Latina.
 
   - id: exp_eac_barkeley
     company: EAC Personnalité / Barkeley School
     role: Desenvolvedor Full Stack
     period: "julho/2025 a julho/2026"
-    technologies: [Vue.js 2, Vue.js 3, JavaScript, PHP, Laravel, Axios, jQuery,
-                   Bootstrap, MySQL, JWT, REST APIs, Git]
+    technologies: [Vue.js 2, Vue.js 3, JavaScript, Node.js, PHP, Laravel, Axios,
+                   jQuery, Bootstrap, MySQL, JWT, REST APIs, Git]
     domains: [full stack, frontend, backend, EdTech, plataformas educacionais,
               APIs, autenticação, sistemas web]
     summary: >
       Desenvolvimento e manutenção de plataformas educacionais, atuando tanto no
       frontend quanto no backend. Frontend em Vue.js 2 e Vue.js 3, com jQuery,
-      Bootstrap e Axios para consumo de APIs; backend em PHP/Laravel com MySQL e
-      autenticação via JWT. Participação em funcionalidades de área do aluno,
-      afiliação, financeiro, provas, calendário e fluxos internos da plataforma.
+      Bootstrap e Axios para consumo de APIs; backend em Node.js e PHP/Laravel
+      com MySQL e autenticação via JWT. Migração do legado de Vue 2 para Vue 3.
+      Participação em funcionalidades de área do aluno, afiliação, financeiro,
+      provas, calendário e fluxos internos da plataforma.
+
+  - id: exp_cervejabox
+    company: CervejaBox (freelance)
+    role: Desenvolvedor Full Stack — Freelancer (PJ)
+    level: freelance
+    period: "desde julho/2026"
+    technologies: [VTEX Legacy, JavaScript, REST APIs]
+    domains: [e-commerce, manutenção, produção]
+    summary: >
+      Atuação autônoma no e-commerce da CervejaBox, sobre VTEX legado:
+      diagnóstico e correção de bugs em produção e integrações via APIs REST.
 
 # -----------------------------------------------------------------------------
 # PROJETOS
@@ -961,18 +1064,53 @@ projects:
       Telegram. Coberto por suíte de testes automatizados executada no CI.
 
   - id: proj_mba_react_native
-    name: Aplicativo mobile — Trabalho de Conclusão do MBA (USP)
+    name: LazerSP — app mobile de lazer urbano (TCC do MBA USP/ESALQ)
     type: academic_project
     level: academic_project
-    technologies: [react native, javascript, typescript, mobile]
+    technologies: [react native, expo, javascript, typescript, node.js, sqlite, mobile]
     domains: [mobile, startups, empreendedorismo, validação de produto]
     summary: >
-      Aplicativo mobile desenvolvido em React Native como trabalho de conclusão
-      de curso do MBA na USP. O projeto foi validado pelo Sebrae, aprovado numa
-      aceleradora de startups e recebeu nota máxima na avaliação do MBA. Não é
-      experiência profissional remunerada, mas é evidência concreta de
-      construção completa de um app mobile em React Native, do zero à validação
-      externa por terceiros.
+      Aplicativo mobile de lazer urbano em React Native com Expo e API em
+      Node.js com SQLite, trabalho de conclusão do MBA em Engenharia de
+      Software da USP/ESALQ. Recebeu nota 10 e foi selecionado para o Sebrae
+      ESX 2026. Não é experiência profissional remunerada, mas é evidência
+      concreta de construção completa de um app mobile em React Native, do
+      zero à validação externa por terceiros.
+
+  - id: proj_consultas
+    name: Consultas — plataforma de agendamento
+    type: personal_project
+    level: project
+    technologies: [node.js, nestjs, typeorm, postgresql, redis, bullmq, socket.io,
+                   jest, github actions, ci/cd]
+    domains: [backend, APIs, tempo real, filas assíncronas]
+    summary: >
+      Plataforma de agendamento com API em NestJS e TypeORM sobre PostgreSQL,
+      filas assíncronas com BullMQ e Redis, eventos em tempo real com
+      Socket.io, 59 testes automatizados com Jest e CI no GitHub Actions.
+
+  - id: proj_catalogo_api
+    name: Catálogo e Estoque API
+    type: personal_project
+    level: project
+    technologies: [c#, .net 8, asp.net core, entity framework core, sql server,
+                   xunit, moq, clean architecture, design patterns]
+    domains: [backend, APIs, arquitetura]
+    summary: >
+      API em ASP.NET Core aplicando Clean Architecture e Design Patterns, com
+      Entity Framework Core sobre SQL Server e testes automatizados com
+      xUnit/Moq. Projeto próprio para consolidar C# e .NET.
+
+  - id: proj_kanban_ia
+    name: Kanban IA
+    type: personal_project
+    level: project
+    technologies: [java 21, spring boot, angular 17, microsserviços, gemini api]
+    domains: [full stack, microsserviços, inteligência artificial]
+    summary: >
+      Projeto de estudo com arquitetura de microsserviços em Java 21 e Spring
+      Boot no backend, Angular 17 no frontend e integração com IA generativa
+      via API do Gemini.
 
 # -----------------------------------------------------------------------------
 # ESTUDOS, CURSOS E EXPERIMENTAÇÃO
